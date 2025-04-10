@@ -35,49 +35,12 @@
     }
     .output {
       margin-top: 20px;
+      min-height: 50px;
     }
-
-    /* INTRO LOGO STYLES */
     #introLogo {
-      width: 250px;
-      max-width: 80%;
+      width: 300px;
+      margin: 100px auto 0;
       display: block;
-      margin: 20vh auto 0;
-      animation: glitch-flicker 1s steps(2, end) infinite;
-    }
-
-    @keyframes glitch-flicker {
-      0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
-        opacity: 1;
-      }
-      20%, 22%, 24%, 55% {
-        opacity: 0;
-      }
-    }
-
-    /* Optional green screen flicker */
-    body::before {
-      content: "";
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%;
-      height: 100%;
-      background: #33FF33;
-      opacity: 0;
-      pointer-events: none;
-      animation: flash 4s linear forwards;
-    }
-
-    @keyframes flash {
-      0%, 10%, 30%, 50%, 70%, 90% {
-        opacity: 0.05;
-      }
-      5%, 15%, 35%, 55%, 75%, 95% {
-        opacity: 0;
-      }
-      100% {
-        opacity: 0;
-      }
     }
   </style>
 </head>
@@ -90,10 +53,7 @@
   <div id="mainTerminal" style="display: none;">
     <div class="terminal">
       <div class="logo">[PRISMAGON INC. SECURE LOGIN]</div>
-      <div class="output" id="output">
-        Welcome to the Prismagon Internal Network. <br>
-        Please enter your credentials to continue.
-      </div>
+      <div class="output" id="output"></div>
       <input type="text" id="username" placeholder="Username">
       <input type="password" id="password" placeholder="Password">
       <button onclick="login()">LOGIN</button>
@@ -102,11 +62,33 @@
   </div>
 
   <script>
-    // Timed glitch flicker before showing terminal
-    setTimeout(() => {
-      document.getElementById("introLogo").style.display = "none";
-      document.getElementById("mainTerminal").style.display = "block";
-    }, 4500); // 4.5 seconds of glitch
+    // Intro flicker effect
+    let flickerCount = 0;
+    const logo = document.getElementById("introLogo");
+    const flickerInterval = setInterval(() => {
+      logo.style.display = logo.style.display === "none" ? "block" : "none";
+      flickerCount++;
+      if (flickerCount >= 20) { // More flickers
+        clearInterval(flickerInterval);
+        logo.style.display = "none";
+        document.getElementById("mainTerminal").style.display = "block";
+        typeText("Welcome to the Prismagon Internal Network.<br>Please enter your credentials to continue.", "output", 30);
+      }
+    }, 150); // Faster flicker
+
+    // Typing effect
+    function typeText(text, elementId, speed) {
+      const element = document.getElementById(elementId);
+      let i = 0;
+      function type() {
+        if (i < text.length) {
+          element.innerHTML += text.charAt(i);
+          i++;
+          setTimeout(type, speed);
+        }
+      }
+      type();
+    }
 
     // Login function
     function login() {
