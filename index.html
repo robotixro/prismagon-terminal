@@ -1,0 +1,61 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Prismagon Internal Network</title>
+  <style>
+    body {
+      background-color: #000;
+      color: #33FF33;
+      font-family: 'Courier New', Courier, monospace;
+      padding: 20px;
+    }
+    .terminal {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    input, button {
+      background: none;
+      border: 1px solid #33FF33;
+      color: #33FF33;
+      font-family: inherit;
+      padding: 5px;
+      margin-top: 10px;
+      width: 100%;
+    }
+    button:hover {
+      background-color: #003300;
+      cursor: pointer;
+    }
+    .logo {
+      font-weight: bold;
+      font-size: 18px;
+      margin-bottom: 20px;
+    }
+    .output {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="terminal">
+    <div class="logo">[PRISMAGON INC. SECURE LOGIN]</div>
+    <div class="output" id="output">
+      Welcome to the Prismagon Internal Network. <br>
+      Please enter your credentials to continue.
+    </div>
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="login()">LOGIN</button>
+    <div class="output" id="response"></div>
+  </div>
+
+  <script>
+    function login() {
+      const response = document.getElementById('response');
+      response.innerHTML = 'ACCESS DENIED. INCIDENT LOGGED.';
+    }
+  </script>
+</body>
+</html>
