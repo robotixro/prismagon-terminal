@@ -78,6 +78,7 @@
 
   <img id="introLogo" src="prismagon-logo.png" alt="Prismagon Logo">
 
+  <!-- LOGIN TERMINAL -->
   <div id="mainTerminal" style="display: none;">
     <div class="terminal">
       <div class="logo">[PRISMAGON INC. SECURE LOGIN]</div>
@@ -89,13 +90,19 @@
     </div>
   </div>
 
+  <!-- LORE TERMINAL -->
+  <div id="loreTerminal" style="display: none;">
+    <div class="terminal">
+      <div class="output" id="loreOutput"></div>
+    </div>
+  </div>
+
   <script>
+    // Glitch flicker intro
     const logo = document.getElementById("introLogo");
     const terminal = document.getElementById("mainTerminal");
-    const output = document.getElementById("output");
 
     let flickerCount = 0;
-
     function glitchFlicker() {
       if (flickerCount >= 10 + Math.floor(Math.random() * 10)) {
         logo.style.display = "none";
@@ -107,14 +114,15 @@
       flickerCount++;
       setTimeout(glitchFlicker, 100 + Math.random() * 150);
     }
-
     glitchFlicker();
 
+    // Slow typing welcome message
     function startTyping() {
       const lines = [
         "Welcome to the Prismagon Internal Network.",
         "Please enter your credentials to continue."
       ];
+      const output = document.getElementById("output");
       let lineIndex = 0;
       let charIndex = 0;
 
@@ -136,72 +144,54 @@
       typeLine();
     }
 
+    // Login logic
     function login() {
       const username = document.getElementById('username').value.trim().toLowerCase();
       const password = document.getElementById('password').value.trim();
       const response = document.getElementById('response');
+
       if (username === "melanie.burton@prismagoninc.com" && password === "K12SaltedWounds") {
-        response.innerHTML = "<br>Access Granted. Welcome back, Agent Burton.<br>Loading...";
-        simulateLoadingSequence();
+        response.innerHTML = "<br>Access Granted. Welcome back, Agent Burton.<br>Loading internal logs...";
+        setTimeout(() => {
+          document.getElementById("mainTerminal").style.display = "none";
+          document.getElementById("loreTerminal").style.display = "block";
+          showLore();
+        }, 2000);
       } else {
         response.innerHTML = "<br>ACCESS DENIED. INCIDENT LOGGED.";
       }
     }
 
-    function simulateLoadingSequence() {
-      const response = document.getElementById("response");
-      const loadingSteps = [
-        "Establishing secure tunnel...",
-        "Bypassing external firewall...",
-        "Decrypting internal records...",
-        "Authenticating system integrity...",
-        "Terminal access established."
-      ];
-      let step = 0;
-      response.innerHTML = "";
+    // Lore scrolling after login
+    const loreEntries = [
+      "[SYSTEM]: Initializing internal network...",
+      "[ADMIN]: Welcome, Agent Burton.",
+      "[LOG]: System breach detected in Sector 12.",
+      "[MEMO]: Dr. Veritas report pending approval.",
+      "[WARNING]: AI proxy node unstable.",
+      "[DATA]: Last transmission from Site D: INCOMPLETE.",
+      "[SERVER]: New protocol 'Blackstar' initiated...",
+      "[SECURITY]: Lockdown code █████████ engaged.",
+      "[NODE-7]: 'We were never supposed to open it...'",
+      "[REDACTED]: ---CONNECTION LOST---"
+    ];
 
-      function showStep() {
-        if (step < loadingSteps.length) {
-          response.innerHTML += loadingSteps[step] + "<br>";
-          step++;
-          setTimeout(showStep, 1000);
-        } else {
-          startLoreDump();
+    function showLore() {
+      const loreOutput = document.getElementById("loreOutput");
+      let index = 0;
+
+      function nextLine() {
+        if (index < loreEntries.length) {
+          const line = document.createElement("div");
+          line.textContent = loreEntries[index];
+          loreOutput.appendChild(line);
+          index++;
+          setTimeout(nextLine, 1000 + Math.random() * 500);
         }
       }
 
-      showStep();
-    }
-
-    function startLoreDump() {
-      const response = document.getElementById("response");
-      const loreLines = [
-        ">> [CLASSIFIED RECORD #0442-B] Opened...",
-        ">> Project LUCENT status: UNSTABLE",
-        ">> Personnel Missing: Dr. Halvorsen, Dr. Craig, Technician Loomis",
-        ">> ALERT: Internal anomaly flagged in Sublevel 6",
-        ">> Log corrupted... attempting recovery...",
-        ">> Recovered fragment: '...the machine thinks it's alive now.'",
-        ">> Disconnecting observer feed... [FAILED]",
-        ">> Disconnecting observer feed... [FAILED]",
-        ">> Disconnecting observer feed... [FAILED]",
-        ">> Overriding safety protocols..."
-        // Add more as you develop your lore!
-      ];
-      let i = 0;
-      response.innerHTML = "";
-
-      function showLore() {
-        if (i < loreLines.length) {
-          response.innerHTML += loreLines[i] + "<br>";
-          i++;
-          setTimeout(showLore, 1100);
-        }
-      }
-
-      showLore();
+      nextLine();
     }
   </script>
-
 </body>
 </html>
