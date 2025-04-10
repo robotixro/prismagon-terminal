@@ -10,11 +10,16 @@
       font-family: 'Courier New', Courier, monospace;
       padding: 20px;
       text-align: center;
+      overflow: hidden;
+      position: relative;
     }
 
+    /* TERMINAL WINDOW */
     .terminal {
       max-width: 600px;
       margin: 0 auto;
+      position: relative;
+      z-index: 1;
     }
 
     input, button {
@@ -40,34 +45,41 @@
 
     .output {
       margin-top: 20px;
-      min-height: 50px;
+      min-height: 60px;
     }
 
     #introLogo {
       width: 300px;
-      margin: 100px auto 0;
+      margin: 20vh auto 0;
       display: block;
-      opacity: 1;
+      position: relative;
+      z-index: 1;
     }
 
-    .glitch {
-      animation: glitchFlicker 0.1s infinite;
-    }
-
-    @keyframes glitchFlicker {
-      0% { opacity: 1; transform: translate(0px, 0px); }
-      20% { opacity: 0.6; transform: translate(1px, -1px); }
-      40% { opacity: 0.3; transform: translate(-1px, 2px); }
-      60% { opacity: 0.8; transform: translate(2px, -1px); }
-      80% { opacity: 0.5; transform: translate(-2px, 1px); }
-      100% { opacity: 1; transform: translate(0px, 0px); }
+    /* STATIC CRT SCANLINES OVERLAY */
+    .crt-overlay::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      background-image: repeating-linear-gradient(
+        to bottom,
+        rgba(0, 255, 0, 0.05),
+        rgba(0, 255, 0, 0.05) 1px,
+        transparent 1px,
+        transparent 2px
+      );
+      z-index: 2;
     }
   </style>
 </head>
-<body>
+<body class="crt-overlay">
 
   <!-- INTRO LOGO -->
-  <img id="introLogo" src="prismagon-logo.png" alt="Prismagon Logo" class="glitch">
+  <img id="introLogo" src="prismagon-logo.png" alt="Prismagon Logo">
 
   <!-- MAIN TERMINAL CONTENT -->
   <div id="mainTerminal" style="display: none;">
@@ -82,23 +94,27 @@
   </div>
 
   <script>
-    // Glitchy flicker before loading terminal
-    let flickers = 0;
+    // Random glitchy flicker timing
     const logo = document.getElementById("introLogo");
+    const terminal = document.getElementById("mainTerminal");
 
-    const flickerInterval = setInterval(() => {
-      logo.style.opacity = Math.random() < 0.5 ? "0.2" : "1";
-      flickers++;
-      if (flickers >= 20) {
-        clearInterval(flickerInterval);
-        logo.classList.remove("glitch");
+    let flickerCount = 0;
+
+    function glitchFlicker() {
+      if (flickerCount >= 10 + Math.floor(Math.random() * 10)) {
         logo.style.display = "none";
-        document.getElementById("mainTerminal").style.display = "block";
+        terminal.style.display = "block";
         startTyping();
+        return;
       }
-    }, 100);
+      logo.style.opacity = Math.random() < 0.4 ? "0.1" : "1";
+      flickerCount++;
+      setTimeout(glitchFlicker, 100 + Math.random() * 150); // random beat
+    }
 
-    // Typing function
+    glitchFlicker();
+
+    // Slow typing effect
     function startTyping() {
       const lines = [
         "Welcome to the Prismagon Internal Network.",
@@ -113,12 +129,12 @@
           if (charIndex < lines[lineIndex].length) {
             output.innerHTML += lines[lineIndex].charAt(charIndex);
             charIndex++;
-            setTimeout(typeLine, 30);
+            setTimeout(typeLine, 60 + Math.random() * 50); // slower + natural feel
           } else {
             output.innerHTML += "<br>";
             lineIndex++;
             charIndex = 0;
-            setTimeout(typeLine, 400);
+            setTimeout(typeLine, 600); // delay between lines
           }
         }
       }
@@ -126,7 +142,7 @@
       typeLine();
     }
 
-    // Login function
+    // Login logic
     function login() {
       const username = document.getElementById('username').value.trim().toLowerCase();
       const password = document.getElementById('password').value.trim();
