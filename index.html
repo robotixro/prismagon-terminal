@@ -11,10 +11,12 @@
       padding: 20px;
       text-align: center;
     }
+
     .terminal {
       max-width: 600px;
       margin: 0 auto;
     }
+
     input, button {
       background: none;
       border: 1px solid #33FF33;
@@ -24,30 +26,48 @@
       margin-top: 10px;
       width: 100%;
     }
+
     button:hover {
       background-color: #003300;
       cursor: pointer;
     }
+
     .logo {
       font-weight: bold;
       font-size: 18px;
       margin-bottom: 20px;
     }
+
     .output {
       margin-top: 20px;
       min-height: 50px;
     }
+
     #introLogo {
       width: 300px;
       margin: 100px auto 0;
       display: block;
+      opacity: 1;
+    }
+
+    .glitch {
+      animation: glitchFlicker 0.1s infinite;
+    }
+
+    @keyframes glitchFlicker {
+      0% { opacity: 1; transform: translate(0px, 0px); }
+      20% { opacity: 0.6; transform: translate(1px, -1px); }
+      40% { opacity: 0.3; transform: translate(-1px, 2px); }
+      60% { opacity: 0.8; transform: translate(2px, -1px); }
+      80% { opacity: 0.5; transform: translate(-2px, 1px); }
+      100% { opacity: 1; transform: translate(0px, 0px); }
     }
   </style>
 </head>
 <body>
 
   <!-- INTRO LOGO -->
-  <img id="introLogo" src="prismagon-logo.png" alt="Prismagon Logo">
+  <img id="introLogo" src="prismagon-logo.png" alt="Prismagon Logo" class="glitch">
 
   <!-- MAIN TERMINAL CONTENT -->
   <div id="mainTerminal" style="display: none;">
@@ -62,32 +82,48 @@
   </div>
 
   <script>
-    // Intro flicker effect
-    let flickerCount = 0;
+    // Glitchy flicker before loading terminal
+    let flickers = 0;
     const logo = document.getElementById("introLogo");
+
     const flickerInterval = setInterval(() => {
-      logo.style.display = logo.style.display === "none" ? "block" : "none";
-      flickerCount++;
-      if (flickerCount >= 20) { // More flickers
+      logo.style.opacity = Math.random() < 0.5 ? "0.2" : "1";
+      flickers++;
+      if (flickers >= 20) {
         clearInterval(flickerInterval);
+        logo.classList.remove("glitch");
         logo.style.display = "none";
         document.getElementById("mainTerminal").style.display = "block";
-        typeText("Welcome to the Prismagon Internal Network.<br>Please enter your credentials to continue.", "output", 30);
+        startTyping();
       }
-    }, 150); // Faster flicker
+    }, 100);
 
-    // Typing effect
-    function typeText(text, elementId, speed) {
-      const element = document.getElementById(elementId);
-      let i = 0;
-      function type() {
-        if (i < text.length) {
-          element.innerHTML += text.charAt(i);
-          i++;
-          setTimeout(type, speed);
+    // Typing function
+    function startTyping() {
+      const lines = [
+        "Welcome to the Prismagon Internal Network.",
+        "Please enter your credentials to continue."
+      ];
+      const output = document.getElementById("output");
+      let lineIndex = 0;
+      let charIndex = 0;
+
+      function typeLine() {
+        if (lineIndex < lines.length) {
+          if (charIndex < lines[lineIndex].length) {
+            output.innerHTML += lines[lineIndex].charAt(charIndex);
+            charIndex++;
+            setTimeout(typeLine, 30);
+          } else {
+            output.innerHTML += "<br>";
+            lineIndex++;
+            charIndex = 0;
+            setTimeout(typeLine, 400);
+          }
         }
       }
-      type();
+
+      typeLine();
     }
 
     // Login function
