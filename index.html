@@ -72,6 +72,21 @@
       );
       z-index: 2;
     }
+
+    #loreTerminal .output {
+      max-height: 400px;
+      overflow-y: auto;
+      text-align: left;
+      padding-right: 10px;
+      border: 1px solid #33FF33;
+      padding: 10px;
+    }
+
+    #loreTerminal .output hr {
+      border: none;
+      border-top: 1px solid #33FF33;
+      margin: 5px 0;
+    }
   </style>
 </head>
 <body class="crt-overlay">
@@ -189,7 +204,7 @@
       "[AGENT.BURTON]: The turret is even sending the camera data to voidwell, they are looking through the turrets. And of cource, because the turret uses identification to see if it should shoot or not,",
       "[AGENT.BURTON]: it also has the names and other information of all the agents the turrets camera has seen.",
       "[AGENT.LOCKE]: Okay well",
-      "[SYSTEM]: Terminal shutdown...",
+      "[SYSTEM]: Terminal shutdown..."
     ];
 
     function showLore() {
@@ -201,6 +216,11 @@
           const line = document.createElement("div");
           line.textContent = loreEntries[index];
           loreOutput.appendChild(line);
+
+          const hr = document.createElement("hr");
+          loreOutput.appendChild(hr);
+
+          loreOutput.scrollTop = loreOutput.scrollHeight; // Auto-scroll to bottom
           index++;
           setTimeout(nextLine, 1000 + Math.random() * 500);
         }
