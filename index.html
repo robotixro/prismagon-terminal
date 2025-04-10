@@ -53,8 +53,14 @@
 
   <script>
     function login() {
+      const username = document.getElementById('username').value.trim().toLowerCase();
+      const password = document.getElementById('password').value.trim();
       const response = document.getElementById('response');
-      response.innerHTML = 'ACCESS DENIED. INCIDENT LOGGED.';
+      if (username === "melanie.burton@prismagoninc.com" && password === "K12SaltedWounds") {
+        response.innerHTML = "<br>Access Granted. Welcome back, Agent Burton.<br>Redirecting to internal systems...";
+      } else {
+        response.innerHTML = "<br>ACCESS DENIED. INCIDENT LOGGED.";
+      }
     }
   </script>
 </body>
