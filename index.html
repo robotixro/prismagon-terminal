@@ -11,32 +11,16 @@
       padding: 20px;
       text-align: center;
       overflow: hidden;
-    }
-    .crt {
-      transform: perspective(1000px) scale(1.05);
       position: relative;
-      z-index: 0;
     }
-    .crt::before {
-      content: "";
-      pointer-events: none;
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: repeating-linear-gradient(
-        to bottom,
-        rgba(0, 255, 0, 0.03),
-        rgba(0, 255, 0, 0.03) 2px,
-        transparent 2px,
-        transparent 4px
-      );
-      z-index: 2;
-    }
+
     .terminal {
       max-width: 600px;
       margin: 0 auto;
-      z-index: 1;
       position: relative;
+      z-index: 1;
     }
+
     input, button {
       background: none;
       border: 1px solid #33FF33;
@@ -46,29 +30,53 @@
       margin-top: 10px;
       width: 100%;
     }
+
     button:hover {
       background-color: #003300;
       cursor: pointer;
     }
+
     .logo {
       font-weight: bold;
       font-size: 18px;
       margin-bottom: 20px;
     }
+
     .output {
       margin-top: 20px;
       min-height: 60px;
     }
+
     #introLogo {
       width: 300px;
-      margin: 150px auto 0;
+      margin: 20vh auto 0;
       display: block;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* CRT Scanline Overlay */
+    .crt-overlay::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      background-image: repeating-linear-gradient(
+        to bottom,
+        rgba(0, 255, 0, 0.05),
+        rgba(0, 255, 0, 0.05) 1px,
+        transparent 1px,
+        transparent 2px
+      );
+      z-index: 2;
     }
   </style>
 </head>
-<body>
+<body class="crt-overlay">
 
-<div class="crt">
   <!-- INTRO LOGO -->
   <img id="introLogo" src="prismagon-logo.png" alt="Prismagon Logo">
 
@@ -83,55 +91,89 @@
       <div class="output" id="response"></div>
     </div>
   </div>
-</div>
 
-<script>
-  // Glitchy logo flicker
-  const logo = document.getElementById("introLogo");
-  let flickerTimes = 0;
-  function flicker() {
-    const interval = Math.random() * 200 + 50;
-    logo.style.display = logo.style.display === "none" ? "block" : "none";
-    flickerTimes++;
-    if (flickerTimes < 20) {
-      setTimeout(flicker, interval);
-    } else {
-      logo.style.display = "none";
-      document.getElementById("mainTerminal").style.display = "block";
-      typeText("Welcome to the Prismagon Internal Network.\nPlease enter your credentials to continue.");
+  <script>
+    // Glitchy flicker intro
+    const logo = document.getElementById("introLogo");
+    const terminal = document.getElementById("mainTerminal");
+    let flickerCount = 0;
+
+    function glitchFlicker() {
+      if (flickerCount >= 10 + Math.floor(Math.random() * 10)) {
+        logo.style.display = "none";
+        terminal.style.display = "block";
+        startTyping();
+        return;
+      }
+      logo.style.opacity = Math.random() < 0.4 ? "0.1" : "1";
+      flickerCount++;
+      setTimeout(glitchFlicker, 100 + Math.random() * 150);
     }
-  }
-  flicker();
 
-  // Typewriter effect
-  function typeText(text) {
-    const output = document.getElementById("output");
-    output.innerHTML = "";
-    let i = 0;
-    function type() {
-      if (i < text.length) {
-        const char = text[i] === "\n" ? "<br>" : text[i];
-        output.innerHTML += char;
-        i++;
-        const delay = Math.random() * 80 + 30;
-        setTimeout(type, delay);
+    glitchFlicker();
+
+    // Slow typewriter intro text
+    function startTyping() {
+      const lines = [
+        "Welcome to the Prismagon Internal Network.",
+        "Please enter your credentials to continue."
+      ];
+      const output = document.getElementById("output");
+      let lineIndex = 0;
+      let charIndex = 0;
+
+      function typeLine() {
+        if (lineIndex < lines.length) {
+          if (charIndex < lines[lineIndex].length) {
+            output.innerHTML += lines[lineIndex].charAt(charIndex);
+            charIndex++;
+            setTimeout(typeLine, 60 + Math.random() * 50);
+          } else {
+            output.innerHTML += "<br>";
+            lineIndex++;
+            charIndex = 0;
+            setTimeout(typeLine, 600);
+          }
+        }
+      }
+
+      typeLine();
+    }
+
+    // Login with fake loading sequence
+    function login() {
+      const username = document.getElementById('username').value.trim().toLowerCase();
+      const password = document.getElementById('password').value.trim();
+      const response = document.getElementById('response');
+
+      if (username === "melanie.burton@prismagoninc.com" && password === "K12SaltedWounds") {
+        const loadingLines = [
+          "<br>Access Granted. Welcome back, Agent Burton.",
+          "Redirecting to internal systems...",
+          "",
+          "Establishing secure link...",
+          "Authenticating...",
+          "Initializing PrismOS...",
+          "Accessing Archives...",
+          "System Ready. Welcome."
+        ];
+        let i = 0;
+        response.innerHTML = "";
+
+        function typeLoading() {
+          if (i < loadingLines.length) {
+            response.innerHTML += loadingLines[i] + "<br>";
+            i++;
+            setTimeout(typeLoading, 1000 + Math.random() * 400);
+          }
+        }
+
+        typeLoading();
+      } else {
+        response.innerHTML = "<br>ACCESS DENIED. INCIDENT LOGGED.";
       }
     }
-    type();
-  }
-
-  // Login
-  function login() {
-    const username = document.getElementById('username').value.trim().toLowerCase();
-    const password = document.getElementById('password').value.trim();
-    const response = document.getElementById('response');
-    if (username === "melanie.burton@prismagoninc.com" && password === "K12SaltedWounds") {
-      response.innerHTML = "<br>Access Granted. Welcome back, Agent Burton.<br>Redirecting to internal systems...";
-    } else {
-      response.innerHTML = "<br>ACCESS DENIED. INCIDENT LOGGED.";
-    }
-  }
-</script>
+  </script>
 
 </body>
 </html>
