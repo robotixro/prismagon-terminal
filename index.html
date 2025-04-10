@@ -9,6 +9,7 @@
       color: #33FF33;
       font-family: 'Courier New', Courier, monospace;
       padding: 20px;
+      text-align: center;
     }
     .terminal {
       max-width: 600px;
@@ -35,33 +36,20 @@
     .output {
       margin-top: 20px;
     }
-
-    /* === NEW for flicker logo === */
     #introLogo {
+      width: 150px;
+      margin: 100px auto 0;
       display: block;
-      margin: 0 auto 40px auto;
-      max-width: 200px;
-      animation: flicker 0.1s infinite alternate;
-    }
-
-    @keyframes flicker {
-      0% { opacity: 1; }
-      50% { opacity: 0.3; }
-      100% { opacity: 1; }
-    }
-
-    #mainTerminal {
-      display: none;
     }
   </style>
 </head>
 <body>
 
-  <!-- === NEW: Logo intro === -->
-  <img id="introLogo" src="prismagon logo.png" alt="Prismagon Logo">
+  <!-- INTRO LOGO -->
+  <img id="introLogo" src="prismagon-logo.png" alt="Prismagon Logo">
 
-  <!-- === Your main terminal container, wrapped for easy hide/show === -->
-  <div id="mainTerminal">
+  <!-- MAIN TERMINAL CONTENT -->
+  <div id="mainTerminal" style="display: none;">
     <div class="terminal">
       <div class="logo">[PRISMAGON INC. SECURE LOGIN]</div>
       <div class="output" id="output">
@@ -76,12 +64,20 @@
   </div>
 
   <script>
-    // === Flicker effect ends after 5 seconds ===
-    setTimeout(() => {
-      document.getElementById("introLogo").style.display = "none";
-      document.getElementById("mainTerminal").style.display = "block";
-    }, 5000);
+    // Intro flicker effect (simulate glitch)
+    let flickerCount = 0;
+    const logo = document.getElementById("introLogo");
+    const flickerInterval = setInterval(() => {
+      logo.style.display = logo.style.display === "none" ? "block" : "none";
+      flickerCount++;
+      if (flickerCount >= 10) {
+        clearInterval(flickerInterval);
+        logo.style.display = "none";
+        document.getElementById("mainTerminal").style.display = "block";
+      }
+    }, 400);
 
+    // Login function
     function login() {
       const username = document.getElementById('username').value.trim().toLowerCase();
       const password = document.getElementById('password').value.trim();
@@ -93,5 +89,6 @@
       }
     }
   </script>
+
 </body>
 </html>
