@@ -55,7 +55,6 @@
       z-index: 1;
     }
 
-    /* CRT Scanline Overlay */
     .crt-overlay::before {
       content: "";
       position: fixed;
@@ -77,10 +76,8 @@
 </head>
 <body class="crt-overlay">
 
-  <!-- INTRO LOGO -->
   <img id="introLogo" src="prismagon-logo.png" alt="Prismagon Logo">
 
-  <!-- MAIN TERMINAL CONTENT -->
   <div id="mainTerminal" style="display: none;">
     <div class="terminal">
       <div class="logo">[PRISMAGON INC. SECURE LOGIN]</div>
@@ -93,9 +90,10 @@
   </div>
 
   <script>
-    // Glitchy flicker intro
     const logo = document.getElementById("introLogo");
     const terminal = document.getElementById("mainTerminal");
+    const output = document.getElementById("output");
+
     let flickerCount = 0;
 
     function glitchFlicker() {
@@ -112,13 +110,11 @@
 
     glitchFlicker();
 
-    // Slow typewriter intro text
     function startTyping() {
       const lines = [
         "Welcome to the Prismagon Internal Network.",
         "Please enter your credentials to continue."
       ];
-      const output = document.getElementById("output");
       let lineIndex = 0;
       let charIndex = 0;
 
@@ -140,38 +136,70 @@
       typeLine();
     }
 
-    // Login with fake loading sequence
     function login() {
       const username = document.getElementById('username').value.trim().toLowerCase();
       const password = document.getElementById('password').value.trim();
       const response = document.getElementById('response');
-
       if (username === "melanie.burton@prismagoninc.com" && password === "K12SaltedWounds") {
-        const loadingLines = [
-          "<br>Access Granted. Welcome back, Agent Burton.",
-          "Redirecting to internal systems...",
-          "",
-          "Establishing secure link...",
-          "Authenticating...",
-          "Initializing PrismOS...",
-          "Accessing Archives...",
-          "System Ready. Welcome."
-        ];
-        let i = 0;
-        response.innerHTML = "";
-
-        function typeLoading() {
-          if (i < loadingLines.length) {
-            response.innerHTML += loadingLines[i] + "<br>";
-            i++;
-            setTimeout(typeLoading, 1000 + Math.random() * 400);
-          }
-        }
-
-        typeLoading();
+        response.innerHTML = "<br>Access Granted. Welcome back, Agent Burton.<br>Loading...";
+        simulateLoadingSequence();
       } else {
         response.innerHTML = "<br>ACCESS DENIED. INCIDENT LOGGED.";
       }
+    }
+
+    function simulateLoadingSequence() {
+      const response = document.getElementById("response");
+      const loadingSteps = [
+        "Establishing secure tunnel...",
+        "Bypassing external firewall...",
+        "Decrypting internal records...",
+        "Authenticating system integrity...",
+        "Terminal access established."
+      ];
+      let step = 0;
+      response.innerHTML = "";
+
+      function showStep() {
+        if (step < loadingSteps.length) {
+          response.innerHTML += loadingSteps[step] + "<br>";
+          step++;
+          setTimeout(showStep, 1000);
+        } else {
+          startLoreDump();
+        }
+      }
+
+      showStep();
+    }
+
+    function startLoreDump() {
+      const response = document.getElementById("response");
+      const loreLines = [
+        ">> [CLASSIFIED RECORD #0442-B] Opened...",
+        ">> Project LUCENT status: UNSTABLE",
+        ">> Personnel Missing: Dr. Halvorsen, Dr. Craig, Technician Loomis",
+        ">> ALERT: Internal anomaly flagged in Sublevel 6",
+        ">> Log corrupted... attempting recovery...",
+        ">> Recovered fragment: '...the machine thinks it's alive now.'",
+        ">> Disconnecting observer feed... [FAILED]",
+        ">> Disconnecting observer feed... [FAILED]",
+        ">> Disconnecting observer feed... [FAILED]",
+        ">> Overriding safety protocols..."
+        // Add more as you develop your lore!
+      ];
+      let i = 0;
+      response.innerHTML = "";
+
+      function showLore() {
+        if (i < loreLines.length) {
+          response.innerHTML += loreLines[i] + "<br>";
+          i++;
+          setTimeout(showLore, 1100);
+        }
+      }
+
+      showLore();
     }
   </script>
 
