@@ -99,10 +99,11 @@
       font-size: 14px;
       color: #33FF33;
       margin-bottom: 5px;
+      user-select: none;
     }
 
     .close-button:hover {
-      color: #99ff99;
+      color: red;
     }
   </style>
 </head>
@@ -110,7 +111,6 @@
 
   <img id="introLogo" src="prismagon-logo.png" alt="Prismagon Logo">
 
-  <!-- LOGIN TERMINAL -->
   <div id="mainTerminal" style="display: none;">
     <div class="terminal">
       <div class="logo">[PRISMAGON INC. SECURE LOGIN]</div>
@@ -122,11 +122,10 @@
     </div>
   </div>
 
-  <!-- COMMAND TERMINAL -->
   <div id="commandTerminal" style="display: none;">
     <div class="terminal">
       <div class="output" id="loreOutput" style="display: none;">
-        <div class="close-button" onclick="closeLogs()">[X] Close Logs</div>
+        <div class="close-button" onclick="closeLogs()">[X]</div>
         <div id="logContent"></div>
       </div>
       <input type="text" id="commandInput" placeholder="Enter command..." onkeydown="handleCommand(event)">
@@ -140,7 +139,6 @@
     const loreOutput = document.getElementById("loreOutput");
     const logContent = document.getElementById("logContent");
 
-    // Intro flicker
     let flickerCount = 0;
     function glitchFlicker() {
       if (flickerCount >= 10 + Math.floor(Math.random() * 10)) {
@@ -168,12 +166,12 @@
           if (charIndex < lines[lineIndex].length) {
             output.innerHTML += lines[lineIndex].charAt(charIndex);
             charIndex++;
-            setTimeout(typeLine, 60 + Math.random() * 50);
+            setTimeout(typeLine, 50);
           } else {
             output.innerHTML += "<br>";
             lineIndex++;
             charIndex = 0;
-            setTimeout(typeLine, 600);
+            setTimeout(typeLine, 400);
           }
         }
       }
@@ -212,7 +210,9 @@
 
     function showLoadingAnimation(callback) {
       logContent.innerHTML = "[SYSTEM]: Loading archived messages";
+      loreOutput.style.display = "block";
       let dots = 0;
+
       const loadingInterval = setInterval(() => {
         dots = (dots % 3) + 1;
         logContent.innerHTML = "[SYSTEM]: Loading archived messages" + ".".repeat(dots);
@@ -262,7 +262,7 @@
           logContent.appendChild(document.createElement("hr"));
           logContent.scrollTop = logContent.scrollHeight;
           index++;
-          setTimeout(displayLine, 1000 + Math.random() * 500);
+          setTimeout(displayLine, 250);
         }
       }
 
