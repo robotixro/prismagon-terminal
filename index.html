@@ -88,23 +88,30 @@
       margin: 5px 0;
     }
 
-    #archivedMessages {
+    #commandBar {
       margin-top: 20px;
-      border: 1px solid #33FF33;
-      padding: 10px;
-      position: relative;
     }
 
-    #closeArchived {
+    #textLogsPanel {
+      position: relative;
+      border: 1px solid #33FF33;
+      padding: 10px;
+      text-align: left;
+      margin-top: 20px;
+      max-height: 400px;
+      overflow-y: auto;
+      display: none;
+    }
+
+    #closeLogs {
       position: absolute;
       top: 5px;
       right: 10px;
+      background: none;
+      border: none;
       color: #33FF33;
+      font-size: 16px;
       cursor: pointer;
-    }
-
-    #closeArchived:hover {
-      color: red;
     }
   </style>
 </head>
@@ -128,17 +135,17 @@
   <div id="loreTerminal" style="display: none;">
     <div class="terminal">
       <div class="output" id="loreOutput"></div>
-      <input type="text" id="commandInput" placeholder="Enter command..." style="width: 100%; margin-top: 10px;">
-      <div class="output" id="commandResponse"></div>
-      <div id="archivedMessages" style="display: none;">
-        <div id="closeArchived" onclick="closeArchived()">[X]</div>
-        <div id="archivedContent"></div>
+      <div id="commandBar">
+        <input type="text" id="commandInput" placeholder="Enter command..." onkeydown="handleCommand(event)">
+      </div>
+      <div id="textLogsPanel">
+        <button id="closeLogs" onclick="document.getElementById('textLogsPanel').style.display='none'">X</button>
+        <div id="textLogsContent"></div>
       </div>
     </div>
   </div>
 
   <script>
-    // Glitch flicker intro
     const logo = document.getElementById("introLogo");
     const terminal = document.getElementById("mainTerminal");
 
@@ -156,7 +163,6 @@
     }
     glitchFlicker();
 
-    // Typing effect
     function startTyping() {
       const lines = [
         "Welcome to the Prismagon Internal Network.",
@@ -184,7 +190,6 @@
       typeLine();
     }
 
-    // Login logic
     function login() {
       const username = document.getElementById('username').value.trim().toLowerCase();
       const password = document.getElementById('password').value.trim();
@@ -202,7 +207,6 @@
       }
     }
 
-    // Lore entries
     const loreEntries = [
       "[SYSTEM]: Initializing internal network...",
       "[ADMIN]: Welcome, Agent Burton.",
@@ -241,7 +245,10 @@
           const line = document.createElement("div");
           line.textContent = loreEntries[index];
           loreOutput.appendChild(line);
-          loreOutput.appendChild(document.createElement("hr"));
+
+          const hr = document.createElement("hr");
+          loreOutput.appendChild(hr);
+
           loreOutput.scrollTop = loreOutput.scrollHeight;
           index++;
           setTimeout(nextLine, 1000 + Math.random() * 500);
@@ -251,55 +258,41 @@
       nextLine();
     }
 
-    // Command handler
-    const commandInput = document.getElementById("commandInput");
-    const commandResponse = document.getElementById("commandResponse");
-
-    commandInput.addEventListener("keydown", function (e) {
+    function handleCommand(e) {
       if (e.key === "Enter") {
-        const cmd = commandInput.value.trim().toLowerCase();
-        commandInput.value = "";
+        const cmd = e.target.value.trim().toLowerCase();
+        e.target.value = "";
 
         if (cmd === "textlogs") {
-          loadArchivedMessages();
-        } else {
-          commandResponse.innerHTML = "<br>Unknown command.";
+          showLoadingDots(() => {
+            displayTextLogs();
+          });
         }
       }
-    });
+    }
 
-    function loadArchivedMessages() {
-      let dots = 1;
-      let timer = 0;
-      commandResponse.textContent = "loading archived messages.";
+    function showLoadingDots(callback) {
+      const panel = document.getElementById("textLogsPanel");
+      const content = document.getElementById("textLogsContent");
+      panel.style.display = "block";
+      content.textContent = "loading archived messages";
+      let dotCount = 0;
+      let elapsed = 0;
 
       const interval = setInterval(() => {
-        dots = dots % 3 + 1;
-        commandResponse.textContent = "loading archived messages." + ".".repeat(dots);
-        timer += 500;
-        if (timer >= 5000) {
+        dotCount = (dotCount % 3) + 1;
+        content.textContent = "loading archived messages" + ".".repeat(dotCount);
+        elapsed += 500;
+        if (elapsed >= 5000) {
           clearInterval(interval);
-          commandResponse.textContent = "";
-          showArchived();
+          callback();
         }
       }, 500);
     }
 
-    function showArchived() {
-      const archived = document.getElementById("archivedMessages");
-      const content = document.getElementById("archivedContent");
-      archived.style.display = "block";
-      content.innerHTML = `
-        <strong>[ARCHIVED MESSAGES]</strong><br>
-        - Agent Burton message archive opened.<br>
-        - Contents redacted for security.<br>
-        - Logs may be incomplete.<br>
-        ...
-      `;
-    }
-
-    function closeArchived() {
-      document.getElementById("archivedMessages").style.display = "none";
+    function displayTextLogs() {
+      const content = document.getElementById("textLogsContent");
+      content.innerHTML = loreEntries.map(entry => `<div>${entry}</div><hr>`).join("");
     }
   </script>
 </body>
