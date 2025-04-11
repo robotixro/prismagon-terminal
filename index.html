@@ -8,17 +8,18 @@
       background-color: #000;
       color: #33FF33;
       font-family: 'Courier New', Courier, monospace;
-      padding: 20px;
-      text-align: center;
+      margin: 0;
+      height: 100vh;
       overflow: hidden;
-      position: relative;
     }
 
     .terminal {
       max-width: 600px;
       margin: 0 auto;
-      position: relative;
-      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      padding: 20px;
     }
 
     input, button {
@@ -27,7 +28,6 @@
       color: #33FF33;
       font-family: inherit;
       padding: 5px;
-      margin-top: 10px;
       width: 100%;
     }
 
@@ -40,19 +40,28 @@
       font-weight: bold;
       font-size: 18px;
       margin-bottom: 20px;
+      text-align: center;
     }
 
     .output {
-      margin-top: 20px;
-      min-height: 60px;
+      overflow-y: auto;
+      flex: 1;
+      margin-bottom: 10px;
+      border: 1px solid #33FF33;
+      padding: 10px;
+      position: relative;
+    }
+
+    .output hr {
+      border: none;
+      border-top: 1px solid #33FF33;
+      margin: 5px 0;
     }
 
     #introLogo {
       width: 300px;
       margin: 20vh auto 0;
       display: block;
-      position: relative;
-      z-index: 1;
     }
 
     .crt-overlay::before {
@@ -73,33 +82,19 @@
       z-index: 2;
     }
 
-    #commandTerminal .output {
-      max-height: 400px;
-      overflow-y: auto;
-      text-align: left;
-      padding-right: 10px;
-      border: 1px solid #33FF33;
-      padding: 10px;
-      margin-bottom: 10px;
-    }
-
-    #commandTerminal .output hr {
-      border: none;
-      border-top: 1px solid #33FF33;
-      margin: 5px 0;
-    }
-
     #commandInput {
-      width: 100%;
+      margin: 0;
+      border: 1px solid #33FF33;
+      padding: 5px;
+      font-family: inherit;
     }
 
     .close-button {
-      text-align: right;
+      position: absolute;
+      top: 5px;
+      right: 10px;
       cursor: pointer;
-      font-size: 14px;
       color: #33FF33;
-      margin-bottom: 5px;
-      user-select: none;
     }
 
     .close-button:hover {
@@ -111,6 +106,7 @@
 
   <img id="introLogo" src="prismagon-logo.png" alt="Prismagon Logo">
 
+  <!-- LOGIN TERMINAL -->
   <div id="mainTerminal" style="display: none;">
     <div class="terminal">
       <div class="logo">[PRISMAGON INC. SECURE LOGIN]</div>
@@ -118,10 +114,11 @@
       <input type="text" id="username" placeholder="Username">
       <input type="password" id="password" placeholder="Password">
       <button onclick="login()">LOGIN</button>
-      <div class="output" id="response"></div>
+      <div class="output" id="response" style="margin-top: 10px;"></div>
     </div>
   </div>
 
+  <!-- COMMAND TERMINAL -->
   <div id="commandTerminal" style="display: none;">
     <div class="terminal">
       <div class="output" id="loreOutput" style="display: none;">
@@ -133,11 +130,9 @@
   </div>
 
   <script>
+    // Glitch flicker intro
     const logo = document.getElementById("introLogo");
     const terminal = document.getElementById("mainTerminal");
-    const commandTerminal = document.getElementById("commandTerminal");
-    const loreOutput = document.getElementById("loreOutput");
-    const logContent = document.getElementById("logContent");
 
     let flickerCount = 0;
     function glitchFlicker() {
@@ -153,25 +148,27 @@
     }
     glitchFlicker();
 
+    // Slow typing welcome message
     function startTyping() {
       const lines = [
         "Welcome to the Prismagon Internal Network.",
         "Please enter your credentials to continue."
       ];
       const output = document.getElementById("output");
-      let lineIndex = 0, charIndex = 0;
+      let lineIndex = 0;
+      let charIndex = 0;
 
       function typeLine() {
         if (lineIndex < lines.length) {
           if (charIndex < lines[lineIndex].length) {
             output.innerHTML += lines[lineIndex].charAt(charIndex);
             charIndex++;
-            setTimeout(typeLine, 50);
+            setTimeout(typeLine, 60 + Math.random() * 50);
           } else {
             output.innerHTML += "<br>";
             lineIndex++;
             charIndex = 0;
-            setTimeout(typeLine, 400);
+            setTimeout(typeLine, 600);
           }
         }
       }
@@ -187,91 +184,95 @@
       if (username === "melanie.burton@prismagoninc.com" && password === "K12SaltedWounds") {
         response.innerHTML = "<br>Access Granted. Welcome back, Agent Burton.<br>Loading terminal...";
         setTimeout(() => {
-          terminal.style.display = "none";
-          commandTerminal.style.display = "block";
+          document.getElementById("mainTerminal").style.display = "none";
+          document.getElementById("commandTerminal").style.display = "block";
+          document.getElementById("commandInput").focus();
         }, 2000);
       } else {
         response.innerHTML = "<br>ACCESS DENIED. INCIDENT LOGGED.";
       }
     }
 
-    function handleCommand(event) {
-      if (event.key === "Enter") {
-        const input = document.getElementById("commandInput").value.trim().toLowerCase();
+    // Command handling
+    function handleCommand(e) {
+      if (e.key === "Enter") {
+        const input = e.target.value.trim().toLowerCase();
+        e.target.value = "";
         if (input === "textlogs") {
-          showLoadingAnimation(() => {
-            loreOutput.style.display = "block";
-            showLogs();
-          });
+          loadLogs();
         }
-        document.getElementById("commandInput").value = "";
       }
     }
 
-    function showLoadingAnimation(callback) {
-      logContent.innerHTML = "[SYSTEM]: Loading archived messages";
+    function loadLogs() {
+      const loreOutput = document.getElementById("loreOutput");
+      const logContent = document.getElementById("logContent");
+      logContent.innerHTML = "";
       loreOutput.style.display = "block";
-      let dots = 0;
 
+      const loadingDiv = document.createElement("div");
+      logContent.appendChild(loadingDiv);
+
+      let dotCount = 1;
       const loadingInterval = setInterval(() => {
-        dots = (dots % 3) + 1;
-        logContent.innerHTML = "[SYSTEM]: Loading archived messages" + ".".repeat(dots);
+        loadingDiv.textContent = "loading archived messages" + ".".repeat(dotCount);
+        dotCount = (dotCount % 3) + 1;
       }, 500);
 
       setTimeout(() => {
         clearInterval(loadingInterval);
-        callback();
+        loadingDiv.remove();
+        showLogs();
       }, 5000);
     }
 
     function showLogs() {
-      const entries = [
-        "[AGENT.LOCKE]: Why did automated turret YOU were working on start malfuncioning and shooting OUR agent team?",
-        "[AGENT.BURTON]: I finished all the wiring, tested it using the set images. It passed the test, then I stood in front of it and it didn't shoot. So I went back out of its view",
-        "[AGENT.BURTON]: Then agent Parker came in, the turret seemed normal, just looking around but then just started shooting at him.",
-        "[AGENT.LOCKE]: Then turned to you and charged the laser before it overheated just before killing you.",
+      const logContent = document.getElementById("logContent");
+      const loreEntries = [
+        "[AGENT.LOCKE]: Why did the automated turret YOU were working on start malfunctioning and shooting OUR agent team?",
+        "[AGENT.BURTON]: I finished all the wiring, tested it using the set images. It passed the test, then I stood in front of it and it didn't shoot. So I went back out of its view.",
+        "[AGENT.BURTON]: Then Agent Parker came in. The turret seemed normal at first, just looking around, but then it suddenly started shooting at him.",
+        "[AGENT.LOCKE]: Then it turned to you and charged the laser before it overheated just before killing you.",
         "[AGENT.BURTON]: Yes.",
-        "[AGENT.LOCKE]: So tell me,",
+        "[AGENT.LOCKE]: So tell me...",
         "[AGENT.LOCKE]: HOW DID THAT HAPPEN?",
         "[AGENT.BURTON]: I did everything correctly.",
         "[AGENT.BURTON]: It just did it on its own.",
         "[AGENT.LOCKE]: It just did it on its own? So you're saying it's alive now?",
-        "[AGENT.BURTON]: No. I'm just saying it did it on its own.",
+        "[AGENT.BURTON]: No. I'm just saying...",
+        "[AGENT.BURTON]: It did it on its own.",
         "[AGENT.BURTON]: Plus, there is unnecessary Artificial Intelligence in the hardware.",
-        "[AGENT.LOCKE]: Well it's probably just for finding targets and knowing who is from Prismagon to not shoot.",
-        "[AGENT.BURTON]: I managed to get some of the hardware into a USB stick then I plugged it into my PC.",
+        "[AGENT.LOCKE]: Probably just for target identification — to avoid shooting Prismagon agents.",
+        "[AGENT.BURTON]: I managed to get some of the hardware into a USB stick and plugged it into my PC.",
         "[AGENT.LOCKE]: OK?",
-        "[AGENT.BURTON]: It is sending data to an outside source",
-        "[AGENT.BURTON]: And receiving data, instructions, code.",
+        "[AGENT.BURTON]: It's sending data to an outside source.",
+        "[AGENT.BURTON]: And receiving data, instructions, code...",
         "[AGENT.BURTON]: The turret is being controlled by Voidwell.",
         "[AGENT.LOCKE]: What?",
-        "[AGENT.BURTON]: The turret is even sending the camera data to Voidwell, they are looking through the turrets.",
-        "[AGENT.BURTON]: And of course, it has the names and other information of all the agents the turret camera has seen.",
+        "[AGENT.BURTON]: The turret is even sending the camera feed to Voidwell. They're looking through the turrets.",
+        "[AGENT.BURTON]: And because the turret uses ID to determine if it should shoot or not...",
+        "[AGENT.BURTON]: It also has names and other information of all the agents it's seen.",
         "[AGENT.LOCKE]: Okay well...",
         "[SYSTEM]: Terminal shutdown..."
       ];
 
-      logContent.innerHTML = "";
       let index = 0;
-
-      function displayLine() {
-        if (index < entries.length) {
+      function nextLine() {
+        if (index < loreEntries.length) {
           const line = document.createElement("div");
-          line.textContent = entries[index];
+          line.textContent = loreEntries[index];
           logContent.appendChild(line);
-          logContent.appendChild(document.createElement("hr"));
           logContent.scrollTop = logContent.scrollHeight;
           index++;
-          setTimeout(displayLine, 250);
+          setTimeout(nextLine, 400 + Math.random() * 200);
         }
       }
 
-      displayLine();
+      nextLine();
     }
 
     function closeLogs() {
-      loreOutput.style.display = "none";
-      logContent.innerHTML = "";
+      document.getElementById("loreOutput").style.display = "none";
     }
   </script>
 </body>
