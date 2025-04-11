@@ -43,21 +43,6 @@
       text-align: center;
     }
 
-    .output {
-      overflow-y: auto;
-      flex: 1;
-      margin-bottom: 10px;
-      border: 1px solid #33FF33;
-      padding: 10px;
-      position: relative;
-    }
-
-    .output hr {
-      border: none;
-      border-top: 1px solid #33FF33;
-      margin: 5px 0;
-    }
-
     #introLogo {
       width: 300px;
       margin: 20vh auto 0;
@@ -83,7 +68,7 @@
     }
 
     #commandInput {
-      margin: 0;
+      margin-bottom: 5px;
       border: 1px solid #33FF33;
       padding: 5px;
       font-family: inherit;
@@ -100,6 +85,46 @@
     .close-button:hover {
       color: red;
     }
+
+    /* Log area */
+    .log-area {
+      flex: 1;
+      border: 1px solid #33FF33;
+      padding: 10px;
+      overflow-y: auto;
+      max-height: calc(100vh - 140px);
+      position: relative;
+    }
+
+    .log-entry {
+      margin-bottom: 10px;
+    }
+
+    .log-entry:not(:last-child)::after {
+      content: "";
+      display: block;
+      border-top: 1px solid #33FF33;
+      margin-top: 8px;
+    }
+
+    /* Scrollbar styling */
+    .log-area::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    .log-area::-webkit-scrollbar-track {
+      background: #000;
+    }
+
+    .log-area::-webkit-scrollbar-thumb {
+      background-color: #33FF33;
+      border-radius: 5px;
+    }
+
+    .log-area::-webkit-scrollbar-thumb:hover {
+      background: #66ff66;
+    }
+
   </style>
 </head>
 <body class="crt-overlay">
@@ -121,11 +146,11 @@
   <!-- COMMAND TERMINAL -->
   <div id="commandTerminal" style="display: none;">
     <div class="terminal">
-      <div class="output" id="loreOutput" style="display: none;">
+      <input type="text" id="commandInput" placeholder="Enter command..." onkeydown="handleCommand(event)">
+      <div class="log-area" id="loreOutput" style="display: none;">
         <div class="close-button" onclick="closeLogs()">[X]</div>
         <div id="logContent"></div>
       </div>
-      <input type="text" id="commandInput" placeholder="Enter command..." onkeydown="handleCommand(event)">
     </div>
   </div>
 
@@ -148,7 +173,6 @@
     }
     glitchFlicker();
 
-    // Slow typing welcome message
     function startTyping() {
       const lines = [
         "Welcome to the Prismagon Internal Network.",
@@ -193,7 +217,6 @@
       }
     }
 
-    // Command handling
     function handleCommand(e) {
       if (e.key === "Enter") {
         const input = e.target.value.trim().toLowerCase();
@@ -211,6 +234,7 @@
       loreOutput.style.display = "block";
 
       const loadingDiv = document.createElement("div");
+      loadingDiv.textContent = "loading archived messages.";
       logContent.appendChild(loadingDiv);
 
       let dotCount = 1;
@@ -260,11 +284,12 @@
       function nextLine() {
         if (index < loreEntries.length) {
           const line = document.createElement("div");
+          line.className = "log-entry";
           line.textContent = loreEntries[index];
           logContent.appendChild(line);
           logContent.scrollTop = logContent.scrollHeight;
           index++;
-          setTimeout(nextLine, 400 + Math.random() * 200);
+          setTimeout(nextLine, 300 + Math.random() * 100);
         }
       }
 
