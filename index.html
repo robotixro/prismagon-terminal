@@ -4,33 +4,32 @@
   <meta charset="UTF-8">
   <title>Prismagon Internal Network</title>
   <style>
-    body {
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
       background-color: #000;
       color: #33FF33;
       font-family: 'Courier New', Courier, monospace;
-      margin: 0;
-      height: 100vh;
       overflow: hidden;
     }
 
     .terminal {
       max-width: 600px;
       margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      height: 100%;
       padding: 20px;
     }
 
-   input, button {
-  background: none;
-  border: 1px solid #33FF33;
-  color: #33FF33;
-  font-family: inherit;
-  padding: 5px;
-  width: 100%;
-  margin-top: 8px;
-}
+    input, button {
+      background: none;
+      border: 1px solid #33FF33;
+      color: #33FF33;
+      font-family: inherit;
+      padding: 5px;
+      margin-top: 8px;
+      width: 100%;
+      box-sizing: border-box;
+    }
 
     button:hover {
       background-color: #003300;
@@ -42,6 +41,11 @@
       font-size: 18px;
       margin-bottom: 20px;
       text-align: center;
+    }
+
+    .output {
+      margin-top: 20px;
+      min-height: 60px;
     }
 
     #introLogo {
@@ -68,64 +72,61 @@
       z-index: 2;
     }
 
-    #commandInput {
-      margin-bottom: 5px;
-      border: 1px solid #33FF33;
-      padding: 5px;
-      font-family: inherit;
+    #commandScreen {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
     }
 
-    .close-button {
-      position: absolute;
-      top: 5px;
-      right: 10px;
+    #commandArea {
+      flex: 0 0 auto;
+      padding: 10px;
+    }
+
+    #commandInput {
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    #logOutput {
+      flex: 1 1 auto;
+      overflow-y: auto;
+      padding: 10px;
+      border-top: 1px solid #33FF33;
+    }
+
+    #logOutput div {
+      margin: 4px 0;
+    }
+
+    #logOutput hr {
+      border: none;
+      border-top: 1px solid #33FF33;
+      margin: 6px 0;
+    }
+
+    /* Custom Scrollbar */
+    #logOutput::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    #logOutput::-webkit-scrollbar-track {
+      background: #000;
+    }
+
+    #logOutput::-webkit-scrollbar-thumb {
+      background: #33FF33;
+    }
+
+    #closeBtn {
+      float: right;
       cursor: pointer;
       color: #33FF33;
     }
 
-    .close-button:hover {
+    #closeBtn:hover {
       color: red;
     }
-
-    /* Log area */
-    .log-area {
-      flex: 1;
-      border: 1px solid #33FF33;
-      padding: 10px;
-      overflow-y: auto;
-      max-height: calc(100vh - 140px);
-      position: relative;
-    }
-
-    .log-entry {
-      margin-bottom: 10px;
-    }
-
-    .log-entry:not(:last-child)::after {
-      content: "";
-      display: block;
-      border-top: 1px solid #33FF33;
-      margin-top: 8px;
-    }
-
-    /* Scrollbar styling */
-    .log-area::-webkit-scrollbar {
-      width: 10px;
-    }
-
-    .log-area::-webkit-scrollbar-track {
-      background: #000;
-    }
-
-    .log-area::-webkit-scrollbar-thumb {
-      background-color: #33FF33;
-      border-radius: 5px;
-    }
-
-    .log-area::-webkit-scrollbar-thumb:hover {
-      background: #66ff66;
-    }
-
   </style>
 </head>
 <body class="crt-overlay">
@@ -140,23 +141,21 @@
       <input type="text" id="username" placeholder="Username">
       <input type="password" id="password" placeholder="Password">
       <button onclick="login()">LOGIN</button>
-      <div class="output" id="response" style="margin-top: 10px;"></div>
+      <div class="output" id="response"></div>
     </div>
   </div>
 
-  <!-- COMMAND TERMINAL -->
-  <div id="commandTerminal" style="display: none;">
-    <div class="terminal">
+  <!-- COMMAND BAR TERMINAL -->
+  <div id="commandScreen" style="display: none;">
+    <div id="commandArea">
       <input type="text" id="commandInput" placeholder="Enter command..." onkeydown="handleCommand(event)">
-      <div class="log-area" id="loreOutput" style="display: none;">
-        <div class="close-button" onclick="closeLogs()">[X]</div>
-        <div id="logContent"></div>
-      </div>
+    </div>
+    <div id="logOutput" style="display: none;">
+      <span id="closeBtn" onclick="closeLogs()">[X]</span>
     </div>
   </div>
 
   <script>
-    // Glitch flicker intro
     const logo = document.getElementById("introLogo");
     const terminal = document.getElementById("mainTerminal");
 
@@ -188,16 +187,15 @@
           if (charIndex < lines[lineIndex].length) {
             output.innerHTML += lines[lineIndex].charAt(charIndex);
             charIndex++;
-            setTimeout(typeLine, 60 + Math.random() * 50);
+            setTimeout(typeLine, 50);
           } else {
             output.innerHTML += "<br>";
             lineIndex++;
             charIndex = 0;
-            setTimeout(typeLine, 600);
+            setTimeout(typeLine, 400);
           }
         }
       }
-
       typeLine();
     }
 
@@ -207,11 +205,10 @@
       const response = document.getElementById('response');
 
       if (username === "melanie.burton@prismagoninc.com" && password === "K12SaltedWounds") {
-        response.innerHTML = "<br>Access Granted. Welcome back, Agent Burton.<br>Loading terminal...";
+        response.innerHTML = "<br>Access Granted. Welcome back, Agent Burton.<br>Loading system...";
         setTimeout(() => {
           document.getElementById("mainTerminal").style.display = "none";
-          document.getElementById("commandTerminal").style.display = "block";
-          document.getElementById("commandInput").focus();
+          document.getElementById("commandScreen").style.display = "flex";
         }, 2000);
       } else {
         response.innerHTML = "<br>ACCESS DENIED. INCIDENT LOGGED.";
@@ -220,85 +217,86 @@
 
     function handleCommand(e) {
       if (e.key === "Enter") {
-        const input = e.target.value.trim().toLowerCase();
-        e.target.value = "";
-        if (input === "textlogs") {
-          loadLogs();
+        const input = document.getElementById("commandInput");
+        const command = input.value.trim().toLowerCase();
+        input.value = "";
+        if (command === "textlogs") {
+          showLoadingDots(() => {
+            showLogs();
+          });
         }
       }
     }
 
-    function loadLogs() {
-      const loreOutput = document.getElementById("loreOutput");
-      const logContent = document.getElementById("logContent");
-      logContent.innerHTML = "";
-      loreOutput.style.display = "block";
+    function showLoadingDots(callback) {
+      const output = document.getElementById("logOutput");
+      output.style.display = "block";
+      output.innerHTML = `<span id="closeBtn" onclick="closeLogs()">[X]</span><br><div id="loadingLine">loading archived messages</div>`;
 
-      const loadingDiv = document.createElement("div");
-      loadingDiv.textContent = "loading archived messages.";
-      logContent.appendChild(loadingDiv);
+      let dotCount = 0;
+      const loadingLine = document.getElementById("loadingLine");
 
-      let dotCount = 1;
-      const loadingInterval = setInterval(() => {
-        loadingDiv.textContent = "loading archived messages" + ".".repeat(dotCount);
+      const dotInterval = setInterval(() => {
         dotCount = (dotCount % 3) + 1;
-      }, 500);
+        loadingLine.textContent = "loading archived messages" + ".".repeat(dotCount);
+      }, 400);
 
       setTimeout(() => {
-        clearInterval(loadingInterval);
-        loadingDiv.remove();
-        showLogs();
+        clearInterval(dotInterval);
+        callback();
       }, 5000);
     }
 
     function showLogs() {
-      const logContent = document.getElementById("logContent");
-      const loreEntries = [
-        "[AGENT.LOCKE]: Why did the automated turret YOU were working on start malfunctioning and shooting OUR agent team?",
-        "[AGENT.BURTON]: I finished all the wiring, tested it using the set images. It passed the test, then I stood in front of it and it didn't shoot. So I went back out of its view.",
-        "[AGENT.BURTON]: Then Agent Parker came in. The turret seemed normal at first, just looking around, but then it suddenly started shooting at him.",
-        "[AGENT.LOCKE]: Then it turned to you and charged the laser before it overheated just before killing you.",
-        "[AGENT.BURTON]: Yes.",
-        "[AGENT.LOCKE]: So tell me...",
-        "[AGENT.LOCKE]: HOW DID THAT HAPPEN?",
+      const output = document.getElementById("logOutput");
+      const messages = [
+        "[AGENT.LOCKE]: Why did automated turret YOU were working on start malfuncioning and shooting OUR agent team?",
+        "[AGENT.BURTON]: I finished all the wiring, tested it using the set images. It passed the test, then I stood in front of it and it didn't shoot. So I went back out of its view",
+        "[AGENT.BURTON]: then agent Parker came in then the turret seemed normal, just looking around but then just started shooting at him.",
+        "[AGENT.LOCKE]: Then turned to you and charged the laser before it overheated just before killing you.",
+        "[AGENT.BURTON]: Yes",
+        "[AGENT.LOCKE]: So tell me,",
+        "[AGENT.LOCKE]: HOW DID THAT HAPPEN",
         "[AGENT.BURTON]: I did everything correctly.",
         "[AGENT.BURTON]: It just did it on its own.",
-        "[AGENT.LOCKE]: It just did it on its own? So you're saying it's alive now?",
-        "[AGENT.BURTON]: No. I'm just saying...",
-        "[AGENT.BURTON]: It did it on its own.",
+        "[AGENT.LOCKE]: It just did it on its own? so you're saying its alive now?",
+        "[AGENT.BURTON]: No. I'm just saying",
+        "[AGENT.BURTON]: it did it on its own.",
         "[AGENT.BURTON]: Plus, there is unnecessary Artificial Intelligence in the hardware.",
-        "[AGENT.LOCKE]: Probably just for target identification — to avoid shooting Prismagon agents.",
-        "[AGENT.BURTON]: I managed to get some of the hardware into a USB stick and plugged it into my PC.",
+        "[AGENT.LOCKE]: Well it's probably just for finding targets and knowing who is from prismagon to not shoot.",
+        "[AGENT.BURTON]: I managed to get some of the hardware into a USB stick then I plugged it into my PC.",
         "[AGENT.LOCKE]: OK?",
-        "[AGENT.BURTON]: It's sending data to an outside source.",
-        "[AGENT.BURTON]: And receiving data, instructions, code...",
-        "[AGENT.BURTON]: The turret is being controlled by Voidwell.",
+        "[AGENT.BURTON]: It is sending data to an outside source",
+        "[AGENT.BURTON]: and receiving data, instructions, code,",
+        "[AGENT.BURTON]: the turret is being controlled by voidwell.",
         "[AGENT.LOCKE]: What?",
-        "[AGENT.BURTON]: The turret is even sending the camera feed to Voidwell. They're looking through the turrets.",
-        "[AGENT.BURTON]: And because the turret uses ID to determine if it should shoot or not...",
-        "[AGENT.BURTON]: It also has names and other information of all the agents it's seen.",
-        "[AGENT.LOCKE]: Okay well...",
+        "[AGENT.BURTON]: The turret is even sending the camera data to voidwell, they are looking through the turrets. And of course, because the turret uses identification to see if it should shoot or not,",
+        "[AGENT.BURTON]: it also has the names and other information of all the agents the turret camera has seen.",
+        "[AGENT.LOCKE]: Okay well",
         "[SYSTEM]: Terminal shutdown..."
       ];
 
+      output.innerHTML = `<span id="closeBtn" onclick="closeLogs()">[X]</span><br>`;
       let index = 0;
-      function nextLine() {
-        if (index < loreEntries.length) {
+
+      function printLine() {
+        if (index < messages.length) {
           const line = document.createElement("div");
-          line.className = "log-entry";
-          line.textContent = loreEntries[index];
-          logContent.appendChild(line);
-          logContent.scrollTop = logContent.scrollHeight;
+          line.textContent = messages[index];
+          output.appendChild(line);
+          output.appendChild(document.createElement("hr"));
+          output.scrollTop = output.scrollHeight;
           index++;
-          setTimeout(nextLine, 300 + Math.random() * 100);
+          setTimeout(printLine, 300);
         }
       }
-
-      nextLine();
+      printLine();
     }
 
     function closeLogs() {
-      document.getElementById("loreOutput").style.display = "none";
+      const output = document.getElementById("logOutput");
+      output.innerHTML = `<span id="closeBtn" onclick="closeLogs()">[X]</span><br>`;
+      output.style.display = "none";
     }
   </script>
 </body>
