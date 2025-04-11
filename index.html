@@ -87,6 +87,25 @@
       border-top: 1px solid #33FF33;
       margin: 5px 0;
     }
+
+    #archivedMessages {
+      margin-top: 20px;
+      border: 1px solid #33FF33;
+      padding: 10px;
+      position: relative;
+    }
+
+    #closeArchived {
+      position: absolute;
+      top: 5px;
+      right: 10px;
+      color: #33FF33;
+      cursor: pointer;
+    }
+
+    #closeArchived:hover {
+      color: red;
+    }
   </style>
 </head>
 <body class="crt-overlay">
@@ -109,6 +128,12 @@
   <div id="loreTerminal" style="display: none;">
     <div class="terminal">
       <div class="output" id="loreOutput"></div>
+      <input type="text" id="commandInput" placeholder="Enter command..." style="width: 100%; margin-top: 10px;">
+      <div class="output" id="commandResponse"></div>
+      <div id="archivedMessages" style="display: none;">
+        <div id="closeArchived" onclick="closeArchived()">[X]</div>
+        <div id="archivedContent"></div>
+      </div>
     </div>
   </div>
 
@@ -131,7 +156,7 @@
     }
     glitchFlicker();
 
-    // Slow typing welcome message
+    // Typing effect
     function startTyping() {
       const lines = [
         "Welcome to the Prismagon Internal Network.",
@@ -177,7 +202,7 @@
       }
     }
 
-    // Lore scrolling after login
+    // Lore entries
     const loreEntries = [
       "[SYSTEM]: Initializing internal network...",
       "[ADMIN]: Welcome, Agent Burton.",
@@ -201,8 +226,8 @@
       "[AGENT.BURTON]: and recieving data, instructions, code,",
       "[AGENT.BURTON]: the turret is being controlled by voidwell.",
       "[AGENT.LOCKE]: What?",
-      "[AGENT.BURTON]: The turret is even sending the camera data to voidwell, they are looking through the turrets. And of cource, because the turret uses identification to see if it should shoot or not,",
-      "[AGENT.BURTON]: it also has the names and other information of all the agents the turrets camera has seen.",
+      "[AGENT.BURTON]: The turret is even sending the camera data to voidwell, they are looking through the turrets. And of course, because the turret uses identification to see if it should shoot or not,",
+      "[AGENT.BURTON]: it also has the names and other information of all the agents the turret camera has seen.",
       "[AGENT.LOCKE]: Okay well",
       "[SYSTEM]: Terminal shutdown..."
     ];
@@ -216,17 +241,65 @@
           const line = document.createElement("div");
           line.textContent = loreEntries[index];
           loreOutput.appendChild(line);
-
-          const hr = document.createElement("hr");
-          loreOutput.appendChild(hr);
-
-          loreOutput.scrollTop = loreOutput.scrollHeight; // Auto-scroll to bottom
+          loreOutput.appendChild(document.createElement("hr"));
+          loreOutput.scrollTop = loreOutput.scrollHeight;
           index++;
           setTimeout(nextLine, 1000 + Math.random() * 500);
         }
       }
 
       nextLine();
+    }
+
+    // Command handler
+    const commandInput = document.getElementById("commandInput");
+    const commandResponse = document.getElementById("commandResponse");
+
+    commandInput.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        const cmd = commandInput.value.trim().toLowerCase();
+        commandInput.value = "";
+
+        if (cmd === "textlogs") {
+          loadArchivedMessages();
+        } else {
+          commandResponse.innerHTML = "<br>Unknown command.";
+        }
+      }
+    });
+
+    function loadArchivedMessages() {
+      let dots = 1;
+      let timer = 0;
+      commandResponse.textContent = "loading archived messages.";
+
+      const interval = setInterval(() => {
+        dots = dots % 3 + 1;
+        commandResponse.textContent = "loading archived messages." + ".".repeat(dots);
+        timer += 500;
+        if (timer >= 5000) {
+          clearInterval(interval);
+          commandResponse.textContent = "";
+          showArchived();
+        }
+      }, 500);
+    }
+
+    function showArchived() {
+      const archived = document.getElementById("archivedMessages");
+      const content = document.getElementById("archivedContent");
+      archived.style.display = "block";
+      content.innerHTML = `
+        <strong>[ARCHIVED MESSAGES]</strong><br>
+        - Agent Burton message archive opened.<br>
+        - Contents redacted for security.<br>
+        - Logs may be incomplete.<br>
+        ...
+      `;
+    }
+
+    function closeArchived() {
+      document.getElementById("archivedMessages").style.display = "none";
     }
   </script>
 </body>
