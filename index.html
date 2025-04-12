@@ -8,14 +8,17 @@
       background-color: #000;
       color: #33FF33;
       font-family: 'Courier New', Courier, monospace;
-      padding: 20px;
       margin: 0;
+      padding: 0;
       overflow: hidden;
     }
 
     .terminal {
       max-width: 600px;
       margin: 0 auto;
+      padding: 20px;
+      position: relative;
+      z-index: 1;
     }
 
     input, button {
@@ -30,8 +33,7 @@
     }
 
     button:hover {
-      background-color: #00ff00;
-      color: #000;
+      background-color: #003300;
       cursor: pointer;
     }
 
@@ -50,6 +52,8 @@
       width: 300px;
       margin: 20vh auto 0;
       display: none;
+      position: relative;
+      z-index: 1;
     }
 
     .crt-overlay::before {
@@ -68,6 +72,18 @@
         transparent 2px
       );
       z-index: 2;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background-color: #33FF33;
+    }
+
+    ::-webkit-scrollbar-track {
+      background-color: #000;
     }
 
     #commandSection {
@@ -95,21 +111,6 @@
       color: #33FF33;
     }
 
-    #logOutput::-webkit-scrollbar,
-    #videoOutput::-webkit-scrollbar {
-      width: 8px;
-    }
-
-    #logOutput::-webkit-scrollbar-thumb,
-    #videoOutput::-webkit-scrollbar-thumb {
-      background-color: #33FF33;
-    }
-
-    #logOutput::-webkit-scrollbar-track,
-    #videoOutput::-webkit-scrollbar-track {
-      background-color: #000;
-    }
-
     #logOutput hr {
       border: none;
       border-top: 1px solid #33FF33;
@@ -134,28 +135,24 @@
       margin-top: 20px;
     }
 
-    #pressKeyScreen {
+    #pressToContinue {
       position: fixed;
-      top: 0;
-      left: 0;
-      height: 100%;
       width: 100%;
-      background-color: #000;
+      height: 100%;
+      background-color: black;
       color: #33FF33;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 20px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 24px;
-      z-index: 9999;
-    }
-
-    #mainTerminal {
-      display: none;
+      z-index: 5;
     }
   </style>
 </head>
 <body class="crt-overlay">
-  <div id="pressKeyScreen">Press any key to continue...</div>
+
+  <div id="pressToContinue">Press any key or tap to continue...</div>
 
   <audio id="introAudio">
     <source src="Intro.m4a" type="audio/mp4">
@@ -164,7 +161,7 @@
 
   <img id="introLogo" src="prismagon-logo.png" alt="Prismagon Logo">
 
-  <div id="mainTerminal">
+  <div id="mainTerminal" style="display: none;">
     <div class="terminal">
       <div class="logo">[PRISMAGON INC. SECURE LOGIN]</div>
       <div class="output" id="output"></div>
@@ -177,9 +174,11 @@
 
   <div id="commandSection">
     <input type="text" id="commandInput" placeholder="Enter command..." onkeydown="if(event.key==='Enter'){handleCommand()}">
+    
     <div id="logOutput">
       <span class="closeBtn" onclick="closeLogs()">[X]</span>
     </div>
+    
     <div id="videoOutput">
       <span class="closeBtn" onclick="closeVideo()">[X]</span>
       <video id="securityCamVideo" controls>
@@ -190,31 +189,34 @@
   </div>
 
   <script>
-    const introAudio = document.getElementById("introAudio");
-    introAudio.volume = 1;
-
+    const audio = document.getElementById("introAudio");
     const logo = document.getElementById("introLogo");
     const terminal = document.getElementById("mainTerminal");
-    const pressKey = document.getElementById("pressKeyScreen");
+    const continueScreen = document.getElementById("pressToContinue");
 
-    document.addEventListener("keydown", startIntro, { once: true });
+    continueScreen.addEventListener("click", startIntro);
+    document.addEventListener("keydown", startIntro);
 
     function startIntro() {
-      pressKey.style.display = "none";
+      document.removeEventListener("keydown", startIntro);
+      continueScreen.style.display = "none";
       logo.style.display = "block";
-      introAudio.play();
-      glitchLogo(0);
+      audio.volume = 1;
+      audio.play();
+      glitchFlicker();
     }
 
-    function glitchLogo(count) {
-      if (count >= 15) {
+    let flickerCount = 0;
+    function glitchFlicker() {
+      if (flickerCount >= 10 + Math.floor(Math.random() * 10)) {
         logo.style.display = "none";
         terminal.style.display = "block";
         startTyping();
         return;
       }
       logo.style.opacity = Math.random() < 0.4 ? "0.1" : "1";
-      setTimeout(() => glitchLogo(count + 1), 200 + Math.random() * 150);
+      flickerCount++;
+      setTimeout(glitchFlicker, 100 + Math.random() * 150);
     }
 
     function startTyping() {
@@ -223,17 +225,19 @@
         "Please enter your credentials to continue."
       ];
       const output = document.getElementById("output");
-      let lineIndex = 0, charIndex = 0;
+      let lineIndex = 0;
+      let charIndex = 0;
 
       function typeLine() {
         if (lineIndex < lines.length) {
           if (charIndex < lines[lineIndex].length) {
-            output.innerHTML += lines[lineIndex].charAt(charIndex++);
+            output.innerHTML += lines[lineIndex].charAt(charIndex);
+            charIndex++;
             setTimeout(typeLine, 60 + Math.random() * 50);
           } else {
             output.innerHTML += "<br>";
-            charIndex = 0;
             lineIndex++;
+            charIndex = 0;
             setTimeout(typeLine, 600);
           }
         }
@@ -249,7 +253,7 @@
       if (username === "melanie.burton@prismagoninc.com" && password === "K12WhyAmISecret") {
         response.innerHTML = "<br>Access Granted. Welcome back, Agent Burton.<br>Loading command interface...";
         setTimeout(() => {
-          terminal.style.display = "none";
+          document.getElementById("mainTerminal").style.display = "none";
           document.getElementById("commandSection").style.display = "flex";
         }, 2000);
       } else {
@@ -319,15 +323,17 @@
         function nextLine() {
           if (index < loreEntries.length) {
             const line = document.createElement("div");
-            line.textContent = loreEntries[index++];
+            line.textContent = loreEntries[index];
             logOutput.appendChild(line);
-            logOutput.appendChild(document.createElement("hr"));
+            const hr = document.createElement("hr");
+            logOutput.appendChild(hr);
             logOutput.scrollTop = logOutput.scrollHeight;
+            index++;
             setTimeout(nextLine, 200);
           }
         }
         nextLine();
-      }, 3000);
+      }, 5000);
     }
 
     function closeLogs() {
@@ -336,10 +342,11 @@
 
     function showCamVideo() {
       document.getElementById("logOutput").style.display = "none";
+      const videoContainer = document.getElementById("videoOutput");
+      videoContainer.style.display = "block";
       const video = document.getElementById("securityCamVideo");
       video.currentTime = 0;
       video.play();
-      document.getElementById("videoOutput").style.display = "block";
     }
 
     function closeVideo() {
