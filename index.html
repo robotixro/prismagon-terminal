@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Prismagon Internal Network</title>
   <style>
     body {
@@ -9,26 +9,30 @@
       color: #33FF33;
       font-family: 'Courier New', Courier, monospace;
       margin: 0;
-      padding: 20px;
+      padding: 0;
       overflow: hidden;
     }
 
-    .terminal, #commandSection {
+    #pressAnyKeyScreen {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-size: 24px;
+    }
+
+    #introLogo {
+      width: 300px;
+      margin: 20vh auto 0;
+      display: block;
+      position: relative;
+      z-index: 1;
+    }
+
+    .terminal {
       max-width: 600px;
       margin: 0 auto;
-      display: none;
-    }
-
-    .logo {
-      font-size: 24px;
-      text-align: center;
-      margin-top: 30vh;
-      font-weight: bold;
-    }
-
-    .output {
-      margin-top: 20px;
-      min-height: 60px;
+      padding: 20px;
     }
 
     input, button {
@@ -42,9 +46,66 @@
       box-sizing: border-box;
     }
 
-    button:hover {
-      background-color: #003300;
+    .logo {
+      font-weight: bold;
+      font-size: 18px;
+      margin-bottom: 20px;
+    }
+
+    .output {
+      margin-top: 20px;
+      min-height: 60px;
+    }
+
+    #mainTerminal {
+      display: none;
+    }
+
+    #commandSection {
+      display: none;
+      flex-direction: column;
+      max-width: 600px;
+      margin: 0 auto;
+      height: 100vh;
+    }
+
+    #commandInput {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+
+    #logOutput, #videoOutput {
+      flex-grow: 1;
+      overflow-y: auto;
+      border: 1px solid #33FF33;
+      padding: 10px;
+      text-align: left;
+      display: none;
+      position: relative;
+    }
+
+    #logOutput hr {
+      border: none;
+      border-top: 1px solid #33FF33;
+      margin: 5px 0;
+    }
+
+    .closeBtn {
+      position: absolute;
+      right: 10px;
+      top: 5px;
       cursor: pointer;
+      color: #33FF33;
+    }
+
+    .closeBtn:hover {
+      color: red;
+    }
+
+    video {
+      width: 100%;
+      border: 1px solid #33FF33;
+      margin-top: 20px;
     }
 
     .crt-overlay::before {
@@ -64,103 +125,127 @@
       );
       z-index: 2;
     }
-
-    #pressKey {
-      text-align: center;
-      margin-top: 40vh;
-    }
-
-    #logOutput, #videoOutput {
-      flex-grow: 1;
-      overflow-y: auto;
-      white-space: pre-wrap;
-    }
-
-    .glitch {
-      animation: glitchAnim 0.2s infinite;
-    }
-
-    @keyframes glitchAnim {
-      0% { opacity: 1; }
-      50% { opacity: 0; }
-      100% { opacity: 1; }
-    }
   </style>
 </head>
 <body class="crt-overlay">
 
-  <div id="pressKey">[Press any key to continue]</div>
+  <div id="pressAnyKeyScreen">Press any key to continue</div>
 
-  <div class="logo" id="introLogo" style="display:none;">
-    > PRISMAGON INC
+  <audio id="introAudio">
+    <source src="Intro.m4a" type="audio/mp4">
+    Your browser does not support the audio element.
+  </audio>
+
+  <img id="introLogo" src="prismagon-logo.png" alt="Prismagon Logo" style="display: none;">
+
+  <div id="mainTerminal">
+    <div class="terminal">
+      <div class="logo">[PRISMAGON INC. SECURE LOGIN]</div>
+      <div class="output" id="output"></div>
+      <input type="text" id="username" placeholder="Username">
+      <input type="password" id="password" placeholder="Password">
+      <button onclick="login()">LOGIN</button>
+      <div class="output" id="response"></div>
+    </div>
   </div>
 
-  <div class="terminal" id="commandSection">
-    <input type="text" id="commandInput" placeholder="Enter command..." autofocus />
-    <div id="logOutput"></div>
-    <div id="videoOutput" style="display: none;"></div>
+  <div id="commandSection">
+    <input type="text" id="commandInput" placeholder="Enter command..." onkeydown="if(event.key==='Enter'){handleCommand()}">
+    <div id="logOutput"><span class="closeBtn" onclick="closeLogs()">[X]</span></div>
+    <div id="videoOutput">
+      <span class="closeBtn" onclick="closeVideo()">[X]</span>
+      <video id="securityCamVideo" controls>
+        <source src="securitycam1.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+    </div>
   </div>
-
-  <audio id="introAudio" src="Intro.m4a" preload="auto"></audio>
 
   <script>
-    const pressKeyDiv = document.getElementById("pressKey");
-    const introLogo = document.getElementById("introLogo");
-    const commandSection = document.getElementById("commandSection");
     const audio = document.getElementById("introAudio");
+    const logo = document.getElementById("introLogo");
+    const terminal = document.getElementById("mainTerminal");
+    const pressScreen = document.getElementById("pressAnyKeyScreen");
 
-    let glitchInterval;
-
-    function glitchLogo() {
-      glitchInterval = setInterval(() => {
-        introLogo.style.visibility = Math.random() < 0.5 ? "hidden" : "visible";
-      }, 100);
-    }
-
-    function stopGlitching() {
-      clearInterval(glitchInterval);
-      introLogo.style.visibility = "visible";
-    }
-
-    function startSequence() {
-      pressKeyDiv.style.display = "none";
-      introLogo.style.display = "block";
-      audio.volume = 1;
+    document.addEventListener("keydown", () => {
+      pressScreen.style.display = "none";
+      logo.style.display = "block";
       audio.play();
+      startGlitching();
+    }, { once: true });
 
-      glitchLogo();
-
-      setTimeout(() => {
-        stopGlitching();
-        introLogo.style.display = "none";
-        commandSection.style.display = "block";
-        document.getElementById("commandInput").focus();
-      }, 5000);
+    let flickerCount = 0;
+    function startGlitching() {
+      if (flickerCount >= 10 + Math.floor(Math.random() * 10)) {
+        logo.style.display = "none";
+        terminal.style.display = "block";
+        startTyping();
+        return;
+      }
+      logo.style.opacity = Math.random() < 0.4 ? "0.1" : "1";
+      flickerCount++;
+      setTimeout(startGlitching, 100 + Math.random() * 150);
     }
 
-    window.addEventListener("keydown", () => {
-      if (pressKeyDiv.style.display !== "none") {
-        startSequence();
-      }
-    });
+    function startTyping() {
+      const lines = [
+        "Welcome to the Prismagon Internal Network.",
+        "Please enter your credentials to continue."
+      ];
+      const output = document.getElementById("output");
+      let lineIndex = 0;
+      let charIndex = 0;
 
-    document.getElementById("commandInput").addEventListener("keydown", function(e) {
-      if (e.key === "Enter") {
-        const command = this.value.trim().toLowerCase();
-        this.value = "";
-        if (command === "textlogs") {
-          showLogs();
-        } else {
-          document.getElementById("logOutput").innerText = "Unknown command.";
+      function typeLine() {
+        if (lineIndex < lines.length) {
+          if (charIndex < lines[lineIndex].length) {
+            output.innerHTML += lines[lineIndex].charAt(charIndex);
+            charIndex++;
+            setTimeout(typeLine, 60 + Math.random() * 50);
+          } else {
+            output.innerHTML += "<br>";
+            lineIndex++;
+            charIndex = 0;
+            setTimeout(typeLine, 600);
+          }
         }
       }
-    });
+      typeLine();
+    }
+
+    function login() {
+      const username = document.getElementById('username').value.trim().toLowerCase();
+      const password = document.getElementById('password').value.trim();
+      const response = document.getElementById('response');
+
+      if (username === "melanie.burton@prismagoninc.com" && password === "K12WhyAmISecret") {
+        response.innerHTML = "<br>Access Granted. Welcome back, Agent Burton.<br>Loading command interface...";
+        setTimeout(() => {
+          document.getElementById("mainTerminal").style.display = "none";
+          document.getElementById("commandSection").style.display = "flex";
+        }, 2000);
+      } else {
+        response.innerHTML = "<br>ACCESS DENIED. INCIDENT LOGGED.";
+      }
+    }
+
+    function handleCommand() {
+      const input = document.getElementById("commandInput");
+      const command = input.value.trim().toLowerCase();
+      input.value = "";
+
+      if (command === "textlogs") {
+        showLogs();
+      } else if (command === "camlogs") {
+        showCamVideo();
+      }
+    }
 
     function showLogs() {
       const logOutput = document.getElementById("logOutput");
       const videoOutput = document.getElementById("videoOutput");
       videoOutput.style.display = "none";
-      logOutput.innerHTML = 'Loading archived messages<span id="dots">.</span>';
+      logOutput.innerHTML = '<span class="closeBtn" onclick="closeLogs()">[X]</span>Loading archived messages<span id="dots">.</span>';
       logOutput.style.display = "block";
 
       let dotCount = 1;
@@ -172,8 +257,7 @@
 
       setTimeout(() => {
         clearInterval(dotInterval);
-        logOutput.innerHTML = "";
-
+        logOutput.innerHTML = '<span class="closeBtn" onclick="closeLogs()">[X]</span>';
         const loreEntries = [
           "[SYSTEM]: Initializing internal network...",
           "[ADMIN]: Welcome, Agent Burton.",
@@ -203,16 +287,40 @@
           "[SYSTEM]: Terminal shutdown..."
         ];
 
-        let i = 0;
-        const interval = setInterval(() => {
-          if (i < loreEntries.length) {
-            logOutput.innerHTML += loreEntries[i++] + "\n";
+        let index = 0;
+        function nextLine() {
+          if (index < loreEntries.length) {
+            const line = document.createElement("div");
+            line.textContent = loreEntries[index];
+            logOutput.appendChild(line);
+            const hr = document.createElement("hr");
+            logOutput.appendChild(hr);
             logOutput.scrollTop = logOutput.scrollHeight;
-          } else {
-            clearInterval(interval);
+            index++;
+            setTimeout(nextLine, 200);
           }
-        }, 1000);
+        }
+        nextLine();
       }, 5000);
+    }
+
+    function closeLogs() {
+      document.getElementById("logOutput").style.display = "none";
+    }
+
+    function showCamVideo() {
+      document.getElementById("logOutput").style.display = "none";
+      const videoContainer = document.getElementById("videoOutput");
+      videoContainer.style.display = "block";
+      const video = document.getElementById("securityCamVideo");
+      video.currentTime = 0;
+      video.play();
+    }
+
+    function closeVideo() {
+      const video = document.getElementById("securityCamVideo");
+      video.pause();
+      document.getElementById("videoOutput").style.display = "none";
     }
   </script>
 </body>
