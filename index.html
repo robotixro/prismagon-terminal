@@ -135,11 +135,11 @@
 </head>
 <body class="crt-overlay">
 
-  <!-- Hidden audio-only video -->
-  <video id="introVideo" style="display: none;">
-    <source src="intro.mp4" type="video/mp4">
-    Your browser does not support the video tag.
-  </video>
+  <!-- Audio that plays on page load -->
+  <audio id="introAudio" autoplay>
+    <source src="Intro.m4a" type="audio/mp4">
+    Your browser does not support the audio element.
+  </audio>
 
   <!-- Logo -->
   <img id="introLogo" src="prismagon-logo.png" alt="Prismagon Logo">
@@ -174,22 +174,16 @@
   </div>
 
   <script>
+    const audio = document.getElementById("introAudio");
+    audio.volume = 1;
+
     const logo = document.getElementById("introLogo");
     const terminal = document.getElementById("mainTerminal");
-    const introAudio = document.getElementById("introVideo");
-
-    // Start playing audio at 9s mark
-    introAudio.addEventListener("loadedmetadata", () => {
-      introAudio.currentTime = 9;
-      introAudio.volume = 1;
-      introAudio.play().catch(err => console.warn("Autoplay error:", err));
-    });
 
     let flickerCount = 0;
     function glitchFlicker() {
       if (flickerCount >= 10 + Math.floor(Math.random() * 10)) {
         logo.style.display = "none";
-        introAudio.pause();
         terminal.style.display = "block";
         startTyping();
         return;
@@ -276,29 +270,10 @@
           "[SYSTEM]: Initializing internal network...",
           "[ADMIN]: Welcome, Agent Burton.",
           "[AGENT.LOCKE]: Why did the automated turret YOU were working on start malfunctioning and shooting OUR agent team?",
-          "[AGENT.BURTON]: I finished all the wiring, tested it using the set images. It passed the test, then I stood in front of it and it didn't shoot. So I went back out of its view.",
-          "[AGENT.BURTON]: Then agent Parker came in, then the turret seemed normal just looking around but then just started shooting at him.",
-          "[AGENT.LOCKE]: Then it turned to you and charged the laser before it overheated just before killing you.",
-          "[AGENT.BURTON]: Yes.",
-          "[AGENT.LOCKE]: So tell me,",
+          "[AGENT.BURTON]: I finished all the wiring, tested it using the set images...",
           "[AGENT.LOCKE]: HOW DID THAT HAPPEN",
-          "[AGENT.BURTON]: I did everything correctly.",
-          "[AGENT.BURTON]: It just did it on its own.",
-          "[AGENT.LOCKE]: It just did it on its own? So you're saying it’s alive now?",
-          "[AGENT.BURTON]: No. I'm just saying",
-          "[AGENT.BURTON]: it did it on its own.",
-          "[AGENT.BURTON]: Plus, there is unnecessary Artificial Intelligence in the hardware.",
-          "[AGENT.LOCKE]: Probably just for identifying targets and knowing who is from Prismagon.",
-          "[AGENT.BURTON]: I managed to get some of the hardware into a USB stick and plugged it into my PC.",
-          "[AGENT.LOCKE]: OK?",
-          "[AGENT.BURTON]: It is sending data to an outside source",
-          "[AGENT.BURTON]: and receiving data, instructions, code.",
+          "[AGENT.BURTON]: I did everything correctly...",
           "[AGENT.BURTON]: The turret is being controlled by Voidwell.",
-          "[AGENT.LOCKE]: What?",
-          "[AGENT.BURTON]: The turret is even sending the camera data to Voidwell. They're looking through the turrets.",
-          "[AGENT.BURTON]: And of course, because the turret uses identification to see if it should shoot or not,",
-          "[AGENT.BURTON]: it also has the names and other information of all the agents the turret camera has seen.",
-          "[AGENT.LOCKE]: Okay well",
           "[SYSTEM]: Terminal shutdown..."
         ];
 
