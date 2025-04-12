@@ -5,180 +5,215 @@
   <title>Prismagon Internal Network</title>
   <style>
     body {
-      background-color: black;
-      color: #33ff33;
+      background-color: #000;
+      color: #33FF33;
       font-family: 'Courier New', Courier, monospace;
-      overflow: hidden;
       margin: 0;
-      padding: 0;
+      padding: 20px;
+      overflow: hidden;
     }
 
-    .centered {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      text-align: center;
-    }
-
-    #pressKeyScreen {
-      font-size: 18px;
-    }
-
-    #logoScreen {
-      display: none;
-      animation: fadeIn 1s ease-in-out;
-    }
-
-    #introLogo {
-      width: 300px;
-      animation: glitch 1s infinite;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    @keyframes glitch {
-      0% { transform: translate(0); }
-      20% { transform: translate(-1px, 1px); }
-      40% { transform: translate(1px, -1px); }
-      60% { transform: translate(-1px, -1px); }
-      80% { transform: translate(1px, 1px); }
-      100% { transform: translate(0); }
-    }
-
-    .terminal {
+    .terminal, #commandSection {
       max-width: 600px;
-      margin: 40px auto;
+      margin: 0 auto;
       display: none;
+    }
+
+    .logo {
+      font-size: 24px;
+      text-align: center;
+      margin-top: 30vh;
+      font-weight: bold;
+    }
+
+    .output {
+      margin-top: 20px;
+      min-height: 60px;
     }
 
     input, button {
       background: none;
-      border: 1px solid #33ff33;
-      color: #33ff33;
+      border: 1px solid #33FF33;
+      color: #33FF33;
       font-family: inherit;
       padding: 5px;
+      margin-top: 10px;
       width: 100%;
       box-sizing: border-box;
     }
 
-    .output {
-      white-space: pre-wrap;
-      margin-top: 20px;
-    }
-
-    .closeBtn {
-      color: red;
-      float: right;
+    button:hover {
+      background-color: #003300;
       cursor: pointer;
     }
 
+    .crt-overlay::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      background-image: repeating-linear-gradient(
+        to bottom,
+        rgba(0, 255, 0, 0.05),
+        rgba(0, 255, 0, 0.05) 1px,
+        transparent 1px,
+        transparent 2px
+      );
+      z-index: 2;
+    }
+
+    #pressKey {
+      text-align: center;
+      margin-top: 40vh;
+    }
+
+    #logOutput, #videoOutput {
+      flex-grow: 1;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+
+    .glitch {
+      animation: glitchAnim 0.2s infinite;
+    }
+
+    @keyframes glitchAnim {
+      0% { opacity: 1; }
+      50% { opacity: 0; }
+      100% { opacity: 1; }
+    }
   </style>
 </head>
-<body>
+<body class="crt-overlay">
 
-  <!-- Press Any Key -->
-  <div id="pressKeyScreen" class="centered">[ Press any key to continue ]</div>
+  <div id="pressKey">[Press any key to continue]</div>
 
-  <!-- Logo + Audio -->
-  <div id="logoScreen" class="centered">
-    <img id="introLogo" src="logo.png" alt="Prismagon Logo">
-    <audio id="introAudio" src="Intro.m4a"></audio>
+  <div class="logo" id="introLogo" style="display:none;">
+    > PRISMAGON INC
   </div>
 
-  <!-- Terminal -->
-  <div class="terminal" id="terminal">
-    <input type="text" id="commandInput" placeholder="Enter command..." autocomplete="off">
-    <div class="output" id="logOutput"></div>
+  <div class="terminal" id="commandSection">
+    <input type="text" id="commandInput" placeholder="Enter command..." autofocus />
+    <div id="logOutput"></div>
+    <div id="videoOutput" style="display: none;"></div>
   </div>
+
+  <audio id="introAudio" src="Intro.m4a" preload="auto"></audio>
 
   <script>
-    const pressKeyScreen = document.getElementById("pressKeyScreen");
-    const logoScreen = document.getElementById("logoScreen");
-    const terminal = document.getElementById("terminal");
+    const pressKeyDiv = document.getElementById("pressKey");
+    const introLogo = document.getElementById("introLogo");
+    const commandSection = document.getElementById("commandSection");
     const audio = document.getElementById("introAudio");
 
-    function showLogoScreen() {
-      pressKeyScreen.style.display = "none";
-      logoScreen.style.display = "block";
+    let glitchInterval;
+
+    function glitchLogo() {
+      glitchInterval = setInterval(() => {
+        introLogo.style.visibility = Math.random() < 0.5 ? "hidden" : "visible";
+      }, 100);
+    }
+
+    function stopGlitching() {
+      clearInterval(glitchInterval);
+      introLogo.style.visibility = "visible";
+    }
+
+    function startSequence() {
+      pressKeyDiv.style.display = "none";
+      introLogo.style.display = "block";
       audio.volume = 1;
       audio.play();
 
+      glitchLogo();
+
       setTimeout(() => {
-        logoScreen.style.display = "none";
-        terminal.style.display = "block";
+        stopGlitching();
+        introLogo.style.display = "none";
+        commandSection.style.display = "block";
         document.getElementById("commandInput").focus();
       }, 5000);
     }
 
-    document.addEventListener("keydown", () => {
-      if (pressKeyScreen.style.display !== "none") {
-        showLogoScreen();
+    window.addEventListener("keydown", () => {
+      if (pressKeyDiv.style.display !== "none") {
+        startSequence();
       }
     });
 
-    // Terminal Logic
-    const commandInput = document.getElementById("commandInput");
-    const logOutput = document.getElementById("logOutput");
-
-    commandInput.addEventListener("keydown", function (event) {
-      if (event.key === "Enter") {
-        const cmd = commandInput.value.trim().toLowerCase();
-        if (cmd === "textlogs") {
+    document.getElementById("commandInput").addEventListener("keydown", function(e) {
+      if (e.key === "Enter") {
+        const command = this.value.trim().toLowerCase();
+        this.value = "";
+        if (command === "textlogs") {
           showLogs();
         } else {
-          logOutput.textContent = "Unknown command.";
+          document.getElementById("logOutput").innerText = "Unknown command.";
         }
-        commandInput.value = "";
       }
     });
 
     function showLogs() {
-      const entries = [
-        "[SYSTEM]: Initializing internal network...",
-        "[ADMIN]: Welcome, Agent Burton.",
-        "[AGENT.LOCKE]: Why did the automated turret YOU were working on start malfunctioning and shooting OUR agent team?",
-        "[AGENT.BURTON]: I finished all the wiring, and tested it using the set images. It passed the test, then I stood in front of it and it didn't shoot. So I went back out of its view",
-        "[AGENT.BURTON]: then Agent Parker came in, and then the turret seemed normal. He was just looking around but then just started shooting at him.",
-        "[AGENT.LOCKE]: Then it turned to you and charged the laser before it overheated just before killing you.",
-        "[AGENT.BURTON]: Yes",
-        "[AGENT.LOCKE]: So tell me,",
-        "[AGENT.LOCKE]: HOW DID THAT HAPPEN",
-        "[AGENT.BURTON]: I did everything correctly.",
-        "[AGENT.BURTON]: It just did it on its own.",
-        "[AGENT.LOCKE]: It just did it on its own? So you're saying it's alive now?",
-        "[AGENT.BURTON]: No. I'm just saying",
-        "[AGENT.BURTON]: it did it on its own.",
-        "[AGENT.BURTON]: Plus, there is unnecessary Artificial Intelligence in the hardware.",
-        "[AGENT.LOCKE]: Well it's probably just for finding targets and knowing who is from Prismagon not to shoot.",
-        "[AGENT.BURTON]: I managed to get some of the hardware onto a USB stick, which I then plugged into my PC.",
-        "[AGENT.LOCKE]: OK?",
-        "[AGENT.BURTON]: It is sending data to an outside source",
-        "[AGENT.BURTON]: and receiving data, instructions, code,",
-        "[AGENT.BURTON]: the turret is being controlled by voidwell.",
-        "[AGENT.LOCKE]: What?",
-        "[AGENT.BURTON]: The turret is even sending the camera data to voidwell, they are looking through the turrets. And of course, because the turret uses identification to see if it should shoot or not,",
-        "[AGENT.BURTON]: it also has the names and other information of all the agents the turret camera has seen.",
-        "[AGENT.LOCKE]: Okay well",
-        "[SYSTEM]: Terminal shutdown..."
-      ];
+      const logOutput = document.getElementById("logOutput");
+      const videoOutput = document.getElementById("videoOutput");
+      videoOutput.style.display = "none";
+      logOutput.innerHTML = 'Loading archived messages<span id="dots">.</span>';
+      logOutput.style.display = "block";
 
-      logOutput.textContent = ""; // Clear before typing
-      let i = 0;
-      const interval = setInterval(() => {
-        if (i < entries.length) {
-          logOutput.textContent += entries[i] + "\n";
-          logOutput.scrollTop = logOutput.scrollHeight;
-          i++;
-        } else {
-          clearInterval(interval);
-        }
-      }, 800);
+      let dotCount = 1;
+      const dotsEl = document.getElementById("dots");
+      const dotInterval = setInterval(() => {
+        dotCount = (dotCount % 3) + 1;
+        dotsEl.textContent = ".".repeat(dotCount);
+      }, 500);
+
+      setTimeout(() => {
+        clearInterval(dotInterval);
+        logOutput.innerHTML = "";
+
+        const loreEntries = [
+          "[SYSTEM]: Initializing internal network...",
+          "[ADMIN]: Welcome, Agent Burton.",
+          "[AGENT.LOCKE]: Why did the automated turret YOU were working on start malfunctioning and shooting OUR agent team?",
+          "[AGENT.BURTON]: I finished all the wiring, and tested it using the set images. It passed the test, then I stood in front of it and it didn't shoot. So I went back out of its view",
+          "[AGENT.BURTON]: then Agent Parker came in, and then the turret seemed normal. He was just looking around but then just started shooting at him.",
+          "[AGENT.LOCKE]: Then it turned to you and charged the laser before it overheated just before killing you.",
+          "[AGENT.BURTON]: Yes",
+          "[AGENT.LOCKE]: So tell me,",
+          "[AGENT.LOCKE]: HOW DID THAT HAPPEN",
+          "[AGENT.BURTON]: I did everything correctly.",
+          "[AGENT.BURTON]: It just did it on its own.",
+          "[AGENT.LOCKE]: It just did it on its own? So you're saying it's alive now?",
+          "[AGENT.BURTON]: No. I'm just saying",
+          "[AGENT.BURTON]: it did it on its own.",
+          "[AGENT.BURTON]: Plus, there is unnecessary Artificial Intelligence in the hardware.",
+          "[AGENT.LOCKE]: Well it's probably just for finding targets and knowing who is from Prismagon not to shoot.",
+          "[AGENT.BURTON]: I managed to get some of the hardware onto a USB stick, which I then plugged into my PC.",
+          "[AGENT.LOCKE]: OK?",
+          "[AGENT.BURTON]: It is sending data to an outside source",
+          "[AGENT.BURTON]: and receiving data, instructions, code,",
+          "[AGENT.BURTON]: the turret is being controlled by voidwell.",
+          "[AGENT.LOCKE]: What?",
+          "[AGENT.BURTON]: The turret is even sending the camera data to voidwell, they are looking through the turrets. And of course, because the turret uses identification to see if it should shoot or not,",
+          "[AGENT.BURTON]: it also has the names and other information of all the agents the turret camera has seen.",
+          "[AGENT.LOCKE]: Okay well",
+          "[SYSTEM]: Terminal shutdown..."
+        ];
+
+        let i = 0;
+        const interval = setInterval(() => {
+          if (i < loreEntries.length) {
+            logOutput.innerHTML += loreEntries[i++] + "\n";
+            logOutput.scrollTop = logOutput.scrollHeight;
+          } else {
+            clearInterval(interval);
+          }
+        }, 1000);
+      }, 5000);
     }
   </script>
-
 </body>
 </html>
