@@ -53,6 +53,8 @@
       display: block;
       position: relative;
       z-index: 1;
+      opacity: 0;
+      transition: opacity 1.5s ease-in;
     }
 
     .crt-overlay::before {
@@ -130,9 +132,18 @@
       border: 1px solid #33FF33;
       margin-top: 20px;
     }
+
+    audio {
+      display: none;
+    }
   </style>
 </head>
 <body class="crt-overlay">
+
+  <audio id="introAudio" autoplay>
+    <source src="intro.mp4" type="video/mp4">
+    Your browser does not support the audio tag.
+  </audio>
 
   <img id="introLogo" src="prismagon-logo.png" alt="Prismagon Logo">
 
@@ -168,12 +179,19 @@
   <script>
     const logo = document.getElementById("introLogo");
     const terminal = document.getElementById("mainTerminal");
+    const introAudio = document.getElementById("introAudio");
+
+    // Fade in logo at 9 seconds
+    setTimeout(() => {
+      logo.style.opacity = 1;
+    }, 9000);
 
     let flickerCount = 0;
     function glitchFlicker() {
       if (flickerCount >= 10 + Math.floor(Math.random() * 10)) {
         logo.style.display = "none";
         terminal.style.display = "block";
+        introAudio.pause(); // stop audio when logo disappears
         startTyping();
         return;
       }
@@ -181,7 +199,9 @@
       flickerCount++;
       setTimeout(glitchFlicker, 100 + Math.random() * 150);
     }
-    glitchFlicker();
+
+    // Start glitch after some delay to allow for logo fade
+    setTimeout(glitchFlicker, 11000);
 
     function startTyping() {
       const lines = [
