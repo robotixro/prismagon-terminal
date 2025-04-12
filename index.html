@@ -52,20 +52,7 @@
       margin: 20vh auto 0;
       display: block;
       position: relative;
-      z-index: 2;
-    }
-
-    #introVideo {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      object-fit: cover;
-      z-index: 0;
-      opacity: 0;
-      transition: opacity 2s ease;
-      pointer-events: none;
+      z-index: 1;
     }
 
     .crt-overlay::before {
@@ -83,15 +70,17 @@
         transparent 1px,
         transparent 2px
       );
-      z-index: 3;
+      z-index: 2;
     }
 
     ::-webkit-scrollbar {
       width: 8px;
     }
+
     ::-webkit-scrollbar-thumb {
       background-color: #33FF33;
     }
+
     ::-webkit-scrollbar-track {
       background-color: #000;
     }
@@ -146,11 +135,13 @@
 </head>
 <body class="crt-overlay">
 
-  <video id="introVideo" muted>
+  <!-- Hidden audio-only video -->
+  <video id="introVideo" style="display: none;">
     <source src="intro.mp4" type="video/mp4">
     Your browser does not support the video tag.
   </video>
 
+  <!-- Logo -->
   <img id="introLogo" src="prismagon-logo.png" alt="Prismagon Logo">
 
   <!-- LOGIN TERMINAL -->
@@ -185,21 +176,20 @@
   <script>
     const logo = document.getElementById("introLogo");
     const terminal = document.getElementById("mainTerminal");
-    const introVideo = document.getElementById("introVideo");
+    const introAudio = document.getElementById("introVideo");
 
-    // Start intro.mp4 at 9 seconds and fade in
-    introVideo.currentTime = 9;
-    introVideo.play().then(() => {
-      introVideo.muted = false;
-      introVideo.volume = 1;
-      introVideo.style.opacity = 1;
-    }).catch(err => console.error("Playback error:", err));
+    // Start playing audio at 9s mark
+    introAudio.addEventListener("loadedmetadata", () => {
+      introAudio.currentTime = 9;
+      introAudio.volume = 1;
+      introAudio.play().catch(err => console.warn("Autoplay error:", err));
+    });
 
     let flickerCount = 0;
     function glitchFlicker() {
       if (flickerCount >= 10 + Math.floor(Math.random() * 10)) {
         logo.style.display = "none";
-        introVideo.pause(); // stop video when logo disappears
+        introAudio.pause();
         terminal.style.display = "block";
         startTyping();
         return;
@@ -208,6 +198,7 @@
       flickerCount++;
       setTimeout(glitchFlicker, 100 + Math.random() * 150);
     }
+
     glitchFlicker();
 
     function startTyping() {
