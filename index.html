@@ -1,22 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Prismagon Internal Network</title>
   <style>
     body {
       background-color: #000;
       color: #33FF33;
       font-family: 'Courier New', Courier, monospace;
-      padding: 0;
-      margin: 0;
+      padding: 20px;
       overflow: hidden;
+      margin: 0;
     }
 
-    .terminal, #commandSection {
+    .terminal {
       max-width: 600px;
       margin: 0 auto;
-      padding: 20px;
+      position: relative;
+      z-index: 1;
     }
 
     input, button {
@@ -87,6 +88,8 @@
     #commandSection {
       display: none;
       flex-direction: column;
+      max-width: 600px;
+      margin: 0 auto;
       height: 100vh;
     }
 
@@ -103,8 +106,6 @@
       text-align: left;
       display: none;
       position: relative;
-      background-color: #000;
-      color: #33FF33;
     }
 
     #logOutput hr {
@@ -131,43 +132,43 @@
       margin-top: 20px;
     }
 
-    #continueScreen {
-      width: 100%;
-      height: 100vh;
-      background: #000;
-      color: #33FF33;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Courier New', Courier, monospace;
-      font-size: 20px;
+    #startScreen {
       position: fixed;
       top: 0;
       left: 0;
-      z-index: 5;
+      height: 100vh;
+      width: 100vw;
+      background-color: #000;
+      color: #33FF33;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+      font-size: 20px;
     }
   </style>
 </head>
 <body class="crt-overlay">
 
-  <div id="continueScreen">Press any key to continue</div>
+  <!-- Start screen -->
+  <div id="startScreen">Press any key or tap to continue</div>
 
-  <!-- Audio -->
+  <!-- Intro audio -->
   <audio id="introAudio">
-    <source src="Intro.m4a" type="audio/mp4" />
+    <source src="Intro.m4a" type="audio/mp4">
     Your browser does not support the audio element.
   </audio>
 
   <!-- Logo -->
-  <img id="introLogo" src="prismagon-logo.png" alt="Prismagon Logo" />
+  <img id="introLogo" src="prismagon-logo.png" alt="Prismagon Logo">
 
   <!-- LOGIN TERMINAL -->
   <div id="mainTerminal" style="display: none;">
     <div class="terminal">
       <div class="logo">[PRISMAGON INC. SECURE LOGIN]</div>
       <div class="output" id="output"></div>
-      <input type="text" id="username" placeholder="Username" />
-      <input type="password" id="password" placeholder="Password" />
+      <input type="text" id="username" placeholder="Username">
+      <input type="password" id="password" placeholder="Password">
       <button onclick="login()">LOGIN</button>
       <div class="output" id="response"></div>
     </div>
@@ -175,29 +176,37 @@
 
   <!-- COMMAND TERMINAL -->
   <div id="commandSection">
-    <input type="text" id="commandInput" placeholder="Enter command..." onkeydown="if(event.key==='Enter'){handleCommand()}" />
-    <div id="logOutput">
-      <span class="closeBtn" onclick="closeLogs()">[X]</span>
-    </div>
+    <input type="text" id="commandInput" placeholder="Enter command..." onkeydown="if(event.key==='Enter'){handleCommand()}">
+    <div id="logOutput"><span class="closeBtn" onclick="closeLogs()">[X]</span></div>
     <div id="videoOutput">
       <span class="closeBtn" onclick="closeVideo()">[X]</span>
       <video id="securityCamVideo" controls>
-        <source src="securitycam1.mp4" type="video/mp4" />
+        <source src="securitycam1.mp4" type="video/mp4">
         Your browser does not support the video tag.
       </video>
     </div>
   </div>
 
   <script>
-    const logo = document.getElementById("introLogo");
+    const startScreen = document.getElementById("startScreen");
     const audio = document.getElementById("introAudio");
+    const logo = document.getElementById("introLogo");
     const terminal = document.getElementById("mainTerminal");
-    const continueScreen = document.getElementById("continueScreen");
+
+    function beginIntro() {
+      startScreen.style.display = "none";
+      audio.volume = 1;
+      audio.play();
+      logo.style.display = "block";
+      glitchFlicker();
+    }
+
+    window.addEventListener("keydown", beginIntro, { once: true });
+    window.addEventListener("click", beginIntro, { once: true });
 
     let flickerCount = 0;
-
     function glitchFlicker() {
-      if (flickerCount >= 12 + Math.floor(Math.random() * 5)) {
+      if (flickerCount >= 10 + Math.floor(Math.random() * 10)) {
         logo.style.display = "none";
         terminal.style.display = "block";
         startTyping();
@@ -207,19 +216,6 @@
       flickerCount++;
       setTimeout(glitchFlicker, 100 + Math.random() * 150);
     }
-
-    function startIntro() {
-      document.removeEventListener("keydown", startIntro);
-      document.removeEventListener("click", startIntro);
-      continueScreen.style.display = "none";
-      logo.style.display = "block";
-      audio.volume = 1;
-      audio.play();
-      glitchFlicker();
-    }
-
-    document.addEventListener("keydown", startIntro);
-    document.addEventListener("click", startIntro);
 
     function startTyping() {
       const lines = [
@@ -331,11 +327,11 @@
             logOutput.appendChild(hr);
             logOutput.scrollTop = logOutput.scrollHeight;
             index++;
-            setTimeout(nextLine, 250);
+            setTimeout(nextLine, 200);
           }
         }
         nextLine();
-      }, 3000);
+      }, 5000);
     }
 
     function closeLogs() {
