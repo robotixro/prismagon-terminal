@@ -1,16 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Prismagon Internal Network</title>
   <style>
     body {
       background-color: #000;
       color: #33FF33;
       font-family: 'Courier New', Courier, monospace;
-      padding: 20px;
-      overflow: hidden;
       margin: 0;
+      overflow: hidden;
     }
 
     .terminal {
@@ -18,6 +17,7 @@
       margin: 0 auto;
       position: relative;
       z-index: 1;
+      padding: 20px;
     }
 
     input, button {
@@ -34,17 +34,13 @@
     button:hover {
       background-color: #003300;
       cursor: pointer;
+      box-shadow: 0 0 10px #33FF33;
     }
 
     .logo {
       font-weight: bold;
       font-size: 18px;
       margin-bottom: 20px;
-    }
-
-    .output {
-      margin-top: 20px;
-      min-height: 60px;
     }
 
     #introLogo {
@@ -73,21 +69,6 @@
       z-index: 2;
     }
 
-    #pressKeyOverlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: #000;
-      color: #33FF33;
-      font-size: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 10;
-    }
-
     ::-webkit-scrollbar {
       width: 8px;
     }
@@ -98,6 +79,10 @@
 
     ::-webkit-scrollbar-track {
       background-color: #000;
+    }
+
+    #mainTerminal {
+      display: none;
     }
 
     #commandSection {
@@ -121,6 +106,7 @@
       text-align: left;
       display: none;
       position: relative;
+      background-color: #000;
     }
 
     #logOutput hr {
@@ -146,24 +132,31 @@
       border: 1px solid #33FF33;
       margin-top: 20px;
     }
+
+    #pressKey {
+      color: #33FF33;
+      text-align: center;
+      font-size: 20px;
+      margin-top: 40vh;
+    }
   </style>
 </head>
 <body class="crt-overlay">
 
   <!-- Press Any Key Screen -->
-  <div id="pressKeyOverlay">Press any key or click to continue</div>
+  <div id="pressKey">Press any key or tap to continue...</div>
 
   <!-- Audio -->
   <audio id="introAudio">
-    <source src="Intro.m4a" type="audio/mp4">
+    <source src="Intro.m4a" type="audio/mp4" />
     Your browser does not support the audio element.
   </audio>
 
-  <!-- Logo -->
+  <!-- Glitching Logo -->
   <img id="introLogo" src="prismagon-logo.png" alt="Prismagon Logo">
 
   <!-- LOGIN TERMINAL -->
-  <div id="mainTerminal" style="display: none;">
+  <div id="mainTerminal">
     <div class="terminal">
       <div class="logo">[PRISMAGON INC. SECURE LOGIN]</div>
       <div class="output" id="output"></div>
@@ -177,37 +170,33 @@
   <!-- COMMAND TERMINAL -->
   <div id="commandSection">
     <input type="text" id="commandInput" placeholder="Enter command..." onkeydown="if(event.key==='Enter'){handleCommand()}">
-    
     <div id="logOutput">
       <span class="closeBtn" onclick="closeLogs()">[X]</span>
     </div>
-    
     <div id="videoOutput">
       <span class="closeBtn" onclick="closeVideo()">[X]</span>
       <video id="securityCamVideo" controls>
-        <source src="securitycam1.mp4" type="video/mp4">
+        <source src="securitycam1.mp4" type="video/mp4" />
         Your browser does not support the video tag.
       </video>
     </div>
   </div>
 
   <script>
-    const introLogo = document.getElementById("introLogo");
-    const mainTerminal = document.getElementById("mainTerminal");
-    const introAudio = document.getElementById("introAudio");
-    const pressKeyOverlay = document.getElementById("pressKeyOverlay");
+    const pressKey = document.getElementById("pressKey");
+    const audio = document.getElementById("introAudio");
+    const logo = document.getElementById("introLogo");
+    const terminal = document.getElementById("mainTerminal");
 
-    let flickerCount = 0;
-    function glitchFlicker() {
-      if (flickerCount >= 10 + Math.floor(Math.random() * 10)) {
-        introLogo.style.display = "none";
-        mainTerminal.style.display = "block";
+    function glitchFlicker(count = 0) {
+      if (count >= 15) {
+        logo.style.display = "none";
+        terminal.style.display = "block";
         startTyping();
         return;
       }
-      introLogo.style.opacity = Math.random() < 0.4 ? "0.1" : "1";
-      flickerCount++;
-      setTimeout(glitchFlicker, 100 + Math.random() * 150);
+      logo.style.opacity = Math.random() < 0.4 ? "0.1" : "1";
+      setTimeout(() => glitchFlicker(count + 1), 100 + Math.random() * 150);
     }
 
     function startTyping() {
@@ -233,6 +222,7 @@
           }
         }
       }
+
       typeLine();
     }
 
@@ -281,7 +271,7 @@
       setTimeout(() => {
         clearInterval(dotInterval);
         logOutput.innerHTML = '<span class="closeBtn" onclick="closeLogs()">[X]</span>';
-        const loreEntries = [
+        const lore = [
           "[SYSTEM]: Initializing internal network...",
           "[ADMIN]: Welcome, Agent Burton.",
           "[AGENT.LOCKE]: Why did the automated turret YOU were working on start malfunctioning and shooting OUR agent team?",
@@ -312,9 +302,9 @@
 
         let index = 0;
         function nextLine() {
-          if (index < loreEntries.length) {
+          if (index < lore.length) {
             const line = document.createElement("div");
-            line.textContent = loreEntries[index];
+            line.textContent = lore[index];
             logOutput.appendChild(line);
             const hr = document.createElement("hr");
             logOutput.appendChild(hr);
@@ -324,7 +314,7 @@
           }
         }
         nextLine();
-      }, 3000);
+      }, 5000);
     }
 
     function closeLogs() {
@@ -346,16 +336,23 @@
       document.getElementById("videoOutput").style.display = "none";
     }
 
-    // Trigger everything after key or click
-    function startIntroSequence() {
-      pressKeyOverlay.style.display = "none";
-      introLogo.style.display = "block";
-      introAudio.play();
-      glitchFlicker();
+    // Start sequence on keypress or click
+    function startIntro() {
+      if (window.introStarted) return;
+      window.introStarted = true;
+
+      pressKey.style.display = "none";
+      audio.volume = 1;
+      audio.play();
+
+      setTimeout(() => {
+        logo.style.display = "block";
+        glitchFlicker();
+      }, 1000);
     }
 
-    document.addEventListener("keydown", startIntroSequence, { once: true });
-    document.addEventListener("click", startIntroSequence, { once: true });
+    window.addEventListener("keydown", startIntro);
+    window.addEventListener("click", startIntro);
   </script>
 </body>
 </html>
