@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Prismagon Internal Network</title>
   <style>
     body {
@@ -17,7 +17,6 @@
       max-width: 600px;
       margin: 0 auto;
       position: relative;
-      z-index: 1;
     }
 
     input, button {
@@ -51,8 +50,6 @@
       width: 300px;
       margin: 20vh auto 0;
       display: none;
-      position: relative;
-      z-index: 1;
     }
 
     .crt-overlay::before {
@@ -132,35 +129,26 @@
       margin-top: 20px;
     }
 
-    #startScreen {
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 100vh;
-      width: 100vw;
-      background-color: #000;
-      color: #33FF33;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 10;
-      font-size: 20px;
+    #pressAnyKey {
+      text-align: center;
+      margin-top: 30vh;
+      font-size: 18px;
     }
   </style>
 </head>
 <body class="crt-overlay">
 
-  <!-- Start screen -->
-  <div id="startScreen">Press any key or tap to continue</div>
+  <!-- Press Any Key -->
+  <div id="pressAnyKey">Press any key or tap to continue</div>
 
-  <!-- Intro audio -->
+  <!-- Intro Audio -->
   <audio id="introAudio">
     <source src="Intro.m4a" type="audio/mp4">
     Your browser does not support the audio element.
   </audio>
 
   <!-- Logo -->
-  <img id="introLogo" src="prismagon-logo.png" alt="Prismagon Logo">
+  <img id="introLogo" src="prismagon-logo.png" alt="Prismagon Logo" />
 
   <!-- LOGIN TERMINAL -->
   <div id="mainTerminal" style="display: none;">
@@ -177,7 +165,11 @@
   <!-- COMMAND TERMINAL -->
   <div id="commandSection">
     <input type="text" id="commandInput" placeholder="Enter command..." onkeydown="if(event.key==='Enter'){handleCommand()}">
-    <div id="logOutput"><span class="closeBtn" onclick="closeLogs()">[X]</span></div>
+    
+    <div id="logOutput">
+      <span class="closeBtn" onclick="closeLogs()">[X]</span>
+    </div>
+    
     <div id="videoOutput">
       <span class="closeBtn" onclick="closeVideo()">[X]</span>
       <video id="securityCamVideo" controls>
@@ -188,34 +180,39 @@
   </div>
 
   <script>
-    const startScreen = document.getElementById("startScreen");
     const audio = document.getElementById("introAudio");
     const logo = document.getElementById("introLogo");
     const terminal = document.getElementById("mainTerminal");
-
-    function beginIntro() {
-      startScreen.style.display = "none";
-      audio.volume = 1;
-      audio.play();
-      logo.style.display = "block";
-      glitchFlicker();
-    }
-
-    window.addEventListener("keydown", beginIntro, { once: true });
-    window.addEventListener("click", beginIntro, { once: true });
+    const pressAnyKey = document.getElementById("pressAnyKey");
 
     let flickerCount = 0;
+
     function glitchFlicker() {
-      if (flickerCount >= 10 + Math.floor(Math.random() * 10)) {
-        logo.style.display = "none";
-        terminal.style.display = "block";
-        startTyping();
-        return;
+      logo.style.display = "block";
+      function flicker() {
+        if (flickerCount >= 10 + Math.floor(Math.random() * 10)) {
+          logo.style.display = "none";
+          terminal.style.display = "block";
+          startTyping();
+          return;
+        }
+        logo.style.opacity = Math.random() < 0.4 ? "0.1" : "1";
+        flickerCount++;
+        setTimeout(flicker, 100 + Math.random() * 150);
       }
-      logo.style.opacity = Math.random() < 0.4 ? "0.1" : "1";
-      flickerCount++;
-      setTimeout(glitchFlicker, 100 + Math.random() * 150);
+      flicker();
     }
+
+    function startIntro() {
+      pressAnyKey.style.display = "none";
+      glitchFlicker();
+      audio.currentTime = 0;
+      audio.volume = 1;
+      audio.play();
+    }
+
+    document.addEventListener("keydown", startIntro, { once: true });
+    document.addEventListener("click", startIntro, { once: true });
 
     function startTyping() {
       const lines = [
