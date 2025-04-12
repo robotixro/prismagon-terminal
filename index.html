@@ -1,22 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Prismagon Internal Network</title>
   <style>
     body {
       background-color: #000;
       color: #33FF33;
       font-family: 'Courier New', Courier, monospace;
-      padding: 20px;
-      overflow: hidden;
       margin: 0;
+      padding: 0;
+      overflow: hidden;
     }
 
-    .terminal {
+    .terminal, #commandSection {
       max-width: 600px;
       margin: 0 auto;
-      position: relative;
+      padding: 20px;
     }
 
     input, button {
@@ -41,15 +41,11 @@
       margin-bottom: 20px;
     }
 
-    .output {
-      margin-top: 20px;
-      min-height: 60px;
-    }
-
     #introLogo {
       width: 300px;
+      display: block;
       margin: 20vh auto 0;
-      display: none;
+      opacity: 1;
     }
 
     .crt-overlay::before {
@@ -70,6 +66,16 @@
       z-index: 2;
     }
 
+    #mainTerminal {
+      display: none;
+    }
+
+    #pressAnyKey {
+      text-align: center;
+      margin-top: 40vh;
+      font-size: 18px;
+    }
+
     ::-webkit-scrollbar {
       width: 8px;
     }
@@ -85,22 +91,16 @@
     #commandSection {
       display: none;
       flex-direction: column;
-      max-width: 600px;
-      margin: 0 auto;
       height: 100vh;
     }
 
-    #commandInput {
-      width: 100%;
-      margin-bottom: 10px;
-    }
-
-    #logOutput, #videoOutput {
+    #logOutput {
       flex-grow: 1;
       overflow-y: auto;
+      background-color: #000;
+      color: #33FF33;
       border: 1px solid #33FF33;
       padding: 10px;
-      text-align: left;
       display: none;
       position: relative;
     }
@@ -128,30 +128,20 @@
       border: 1px solid #33FF33;
       margin-top: 20px;
     }
-
-    #pressAnyKey {
-      text-align: center;
-      margin-top: 30vh;
-      font-size: 18px;
-    }
   </style>
 </head>
 <body class="crt-overlay">
 
-  <!-- Press Any Key -->
-  <div id="pressAnyKey">Press any key or tap to continue</div>
-
-  <!-- Intro Audio -->
   <audio id="introAudio">
     <source src="Intro.m4a" type="audio/mp4">
     Your browser does not support the audio element.
   </audio>
 
-  <!-- Logo -->
-  <img id="introLogo" src="prismagon-logo.png" alt="Prismagon Logo" />
+  <div id="pressAnyKey">Press any key or tap to continue...</div>
+  <img id="introLogo" src="prismagon-logo.png" style="display: none;" alt="Prismagon Logo">
 
   <!-- LOGIN TERMINAL -->
-  <div id="mainTerminal" style="display: none;">
+  <div id="mainTerminal">
     <div class="terminal">
       <div class="logo">[PRISMAGON INC. SECURE LOGIN]</div>
       <div class="output" id="output"></div>
@@ -165,12 +155,10 @@
   <!-- COMMAND TERMINAL -->
   <div id="commandSection">
     <input type="text" id="commandInput" placeholder="Enter command..." onkeydown="if(event.key==='Enter'){handleCommand()}">
-    
     <div id="logOutput">
       <span class="closeBtn" onclick="closeLogs()">[X]</span>
     </div>
-    
-    <div id="videoOutput">
+    <div id="videoOutput" style="display: none;">
       <span class="closeBtn" onclick="closeVideo()">[X]</span>
       <video id="securityCamVideo" controls>
         <source src="securitycam1.mp4" type="video/mp4">
@@ -180,39 +168,32 @@
   </div>
 
   <script>
-    const audio = document.getElementById("introAudio");
-    const logo = document.getElementById("introLogo");
-    const terminal = document.getElementById("mainTerminal");
+    const introLogo = document.getElementById("introLogo");
     const pressAnyKey = document.getElementById("pressAnyKey");
-
-    let flickerCount = 0;
-
-    function glitchFlicker() {
-      logo.style.display = "block";
-      function flicker() {
-        if (flickerCount >= 10 + Math.floor(Math.random() * 10)) {
-          logo.style.display = "none";
-          terminal.style.display = "block";
-          startTyping();
-          return;
-        }
-        logo.style.opacity = Math.random() < 0.4 ? "0.1" : "1";
-        flickerCount++;
-        setTimeout(flicker, 100 + Math.random() * 150);
-      }
-      flicker();
-    }
+    const introAudio = document.getElementById("introAudio");
 
     function startIntro() {
       pressAnyKey.style.display = "none";
-      glitchFlicker();
-      audio.currentTime = 0;
-      audio.volume = 1;
-      audio.play();
-    }
+      introLogo.style.display = "block";
+      introAudio.volume = 1;
+      introAudio.play().catch(() => {
+        console.log("Audio playback blocked.");
+      });
 
-    document.addEventListener("keydown", startIntro, { once: true });
-    document.addEventListener("click", startIntro, { once: true });
+      let flickerCount = 0;
+      function glitchFlicker() {
+        if (flickerCount >= 10 + Math.floor(Math.random() * 10)) {
+          introLogo.style.display = "none";
+          document.getElementById("mainTerminal").style.display = "block";
+          startTyping();
+          return;
+        }
+        introLogo.style.opacity = Math.random() < 0.5 ? "0.1" : "1";
+        flickerCount++;
+        setTimeout(glitchFlicker, 100 + Math.random() * 150);
+      }
+      glitchFlicker();
+    }
 
     function startTyping() {
       const lines = [
@@ -239,6 +220,9 @@
       }
       typeLine();
     }
+
+    document.addEventListener("keydown", startIntro, { once: true });
+    document.addEventListener("click", startIntro, { once: true });
 
     function login() {
       const username = document.getElementById('username').value.trim().toLowerCase();
@@ -320,15 +304,15 @@
             const line = document.createElement("div");
             line.textContent = loreEntries[index];
             logOutput.appendChild(line);
+            logOutput.scrollTop = logOutput.scrollHeight;
             const hr = document.createElement("hr");
             logOutput.appendChild(hr);
-            logOutput.scrollTop = logOutput.scrollHeight;
             index++;
             setTimeout(nextLine, 200);
           }
         }
         nextLine();
-      }, 5000);
+      }, 3000);
     }
 
     function closeLogs() {
@@ -336,7 +320,6 @@
     }
 
     function showCamVideo() {
-      document.getElementById("logOutput").style.display = "none";
       const videoContainer = document.getElementById("videoOutput");
       videoContainer.style.display = "block";
       const video = document.getElementById("securityCamVideo");
