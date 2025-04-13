@@ -233,12 +233,14 @@
 
       if (username === "melanie.burton@prismagoninc.com" && password === "K12WhyAmISecret") {
         response.innerHTML = "<br>Access Granted. Welcome back, Agent Burton.<br>Loading command interface...";
+        setTimeout(() => { response.innerHTML = ""; }, 5000);
         setTimeout(() => {
           document.getElementById("mainTerminal").style.display = "none";
           document.getElementById("commandSection").style.display = "flex";
         }, 2000);
       } else {
         response.innerHTML = "<br>ACCESS DENIED. INCIDENT LOGGED.";
+        setTimeout(() => { response.innerHTML = ""; }, 5000);
       }
     }
 
@@ -297,7 +299,6 @@
           "[ADMIN]: Welcome, Agent Burton.",
           "[AGENT.LOCKE]: Why did the automated turret YOU were working on start malfunctioning and shooting OUR agent team?",
           "[AGENT.BURTON]: I finished all the wiring...",
-          // full log from before...
           "[SYSTEM]: Terminal shutdown..."
         ];
 
