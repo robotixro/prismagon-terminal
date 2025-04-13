@@ -354,5 +354,36 @@
     window.addEventListener("keydown", startIntro);
     window.addEventListener("click", startIntro);
   </script>
+  <script>
+  const commandOutput = document.getElementById('terminal-output');
+
+  function executeCommand(command) {
+    command = command.trim().toLowerCase();
+
+    if (command === 'help') {
+      appendOutput(`
+        Available Commands:<br>
+        - <strong>textlogs</strong>: View recovered chat logs.<br>
+        - <strong>camlogs</strong>: Access camera footage.<br>
+        - <strong>help</strong>: Show this help message.<br>
+        <br>
+        Use the [X] button to clear the screen.
+      `);
+    } else if (command === 'textlogs') {
+      // existing logic for textlogs
+    } else if (command === 'camlogs') {
+      // existing logic for camlogs
+    } else {
+      appendOutput('Unknown command. Type <strong>help</strong> for a list of commands.');
+    }
+  }
+
+  function appendOutput(html) {
+    const line = document.createElement('div');
+    line.innerHTML = html;
+    commandOutput.appendChild(line);
+    commandOutput.scrollTop = commandOutput.scrollHeight;
+  }
+</script>
 </body>
 </html>
