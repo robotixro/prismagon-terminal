@@ -29,17 +29,6 @@
       margin-top: 10px;
       width: 100%;
       box-sizing: border-box;
-      caret-color: transparent;
-      position: relative;
-      z-index: 2;
-    }
-
-    input:focus::after {
-      content: attr(data-cursor-char);
-      background-color: #33FF33;
-      color: #000;
-      position: absolute;
-      animation: blink 1s steps(1) infinite;
     }
 
     button:hover {
@@ -104,9 +93,29 @@
       height: 100vh;
     }
 
-    #commandInput {
-      width: 100%;
-      margin-bottom: 10px;
+    .typed-input {
+      caret-color: transparent;
+      font-size: 18px;
+      letter-spacing: 1px;
+      position: relative;
+    }
+
+    .typed-input::after {
+      content: '';
+      position: absolute;
+      width: 1ch;
+      height: 1.2em;
+      background: #33FF33;
+      animation: blink 1s steps(1) infinite;
+      pointer-events: none;
+      transform: translateX(calc(var(--caret-pos, 0) * 1ch));
+      top: 2px;
+    }
+
+    @keyframes blink {
+      50% {
+        background: transparent;
+      }
     }
 
     #logOutput, #videoOutput {
@@ -150,50 +159,37 @@
       font-size: 20px;
       margin-top: 40vh;
     }
-
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0; }
-    }
   </style>
 </head>
 <body class="crt-overlay">
 
-  <!-- Press Any Key Screen -->
   <div id="pressKey">Press any key or tap to continue...</div>
 
-  <!-- Audio -->
   <audio id="introAudio">
     <source src="Intro.m4a" type="audio/mp4" />
     Your browser does not support the audio element.
   </audio>
 
-  <!-- Glitching Logo -->
   <img id="introLogo" src="prismagon-logo.png" alt="Prismagon Logo">
 
-  <!-- LOGIN TERMINAL -->
   <div id="mainTerminal">
     <div class="terminal">
       <div class="logo">[PRISMAGON INC. SECURE LOGIN]</div>
       <div class="output" id="output"></div>
-      <input type="text" id="username" placeholder="Username">
-      <input type="password" id="password" placeholder="Password">
+      <input type="text" id="username" class="typed-input" placeholder="Username" oninput="updateCaret(this)">
+      <input type="password" id="password" class="typed-input" placeholder="Password" oninput="updateCaret(this)">
       <button onclick="login()">LOGIN</button>
       <div class="output" id="response"></div>
     </div>
   </div>
 
-  <!-- COMMAND TERMINAL -->
   <div id="commandSection">
-    <input type="text" id="commandInput" placeholder="Enter command..." onkeydown="if(event.key==='Enter'){handleCommand()}">
-    <div id="logOutput">
-      <span class="closeBtn" onclick="closeLogs()">[X]</span>
-    </div>
+    <input type="text" id="commandInput" class="typed-input" placeholder="Enter command..." oninput="updateCaret(this)" onkeydown="if(event.key==='Enter'){handleCommand()}">
+    <div id="logOutput"><span class="closeBtn" onclick="closeLogs()">[X]</span></div>
     <div id="videoOutput">
       <span class="closeBtn" onclick="closeVideo()">[X]</span>
       <video id="securityCamVideo" controls>
         <source src="securitycam1.mp4" type="video/mp4" />
-        Your browser does not support the video tag.
       </video>
     </div>
   </div>
@@ -250,13 +246,15 @@
       if (username === "melanie.burton@prismagoninc.com" && password === "K12WhyAmISecret") {
         response.innerHTML = "<br>Access Granted. Welcome back, Agent Burton.<br>Loading command interface...";
         setTimeout(() => {
+          response.innerHTML = "";
           document.getElementById("mainTerminal").style.display = "none";
           document.getElementById("commandSection").style.display = "flex";
-          response.innerHTML = "";
         }, 5000);
       } else {
         response.innerHTML = "<br>ACCESS DENIED. INCIDENT LOGGED.";
-        setTimeout(() => response.innerHTML = "", 5000);
+        setTimeout(() => {
+          response.innerHTML = "";
+        }, 5000);
       }
     }
 
@@ -264,26 +262,23 @@
       const input = document.getElementById("commandInput");
       const command = input.value.trim().toLowerCase();
       input.value = "";
+      updateCaret(input);
 
       if (command === "textlogs") {
         showLogs();
       } else if (command === "camlogs") {
         showCamVideo();
       } else if (command === "help") {
-        const logOutput = document.getElementById("logOutput");
-        logOutput.style.display = "block";
-        logOutput.innerHTML = `
-          <span class="closeBtn" onclick="closeLogs()">[X]</span>
-          <div>[SYSTEM]: Available commands:</div>
-          <div>– textlogs</div>
-          <div>– camlogs</div>
-          <div>– signout</div>
-          <hr>
-        `;
+        showHelp();
       } else if (command === "signout") {
         document.getElementById("commandSection").style.display = "none";
         document.getElementById("mainTerminal").style.display = "block";
       }
+    }
+
+    function updateCaret(inputEl) {
+      const caretPos = inputEl.value.length;
+      inputEl.style.setProperty('--caret-pos', caretPos);
     }
 
     function showLogs() {
@@ -307,9 +302,10 @@
           "[SYSTEM]: Initializing internal network...",
           "[ADMIN]: Welcome, Agent Burton.",
           "[AGENT.LOCKE]: Why did the automated turret YOU were working on start malfunctioning and shooting OUR agent team?",
-          "[AGENT.BURTON]: ...",
+          "[AGENT.BURTON]: I finished all the wiring, and tested it using the set images...",
           "[SYSTEM]: Terminal shutdown..."
         ];
+
         let index = 0;
         function nextLine() {
           if (index < lore.length) {
@@ -325,6 +321,21 @@
         }
         nextLine();
       }, 5000);
+    }
+
+    function showHelp() {
+      const logOutput = document.getElementById("logOutput");
+      const videoOutput = document.getElementById("videoOutput");
+      videoOutput.style.display = "none";
+      logOutput.style.display = "block";
+      logOutput.innerHTML = `
+        <span class="closeBtn" onclick="closeLogs()">[X]</span>
+        <div>[HELP MENU]</div>
+        <div>• textlogs - View archived agent messages</div>
+        <div>• camlogs - View last recorded camera footage</div>
+        <div>• signout - Return to login screen</div>
+        <hr>
+      `;
     }
 
     function closeLogs() {
@@ -346,7 +357,6 @@
       document.getElementById("videoOutput").style.display = "none";
     }
 
-    // Start sequence on keypress or click
     function startIntro() {
       if (window.introStarted) return;
       window.introStarted = true;
@@ -359,6 +369,10 @@
         logo.style.display = "block";
         glitchFlicker();
       }, 1000);
+
+      if (document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      }
     }
 
     window.addEventListener("keydown", startIntro);
