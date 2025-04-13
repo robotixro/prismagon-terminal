@@ -143,19 +143,15 @@
 </head>
 <body class="crt-overlay">
 
-  <!-- Press Any Key Screen -->
   <div id="pressKey">Press any key or tap to continue...</div>
 
-  <!-- Audio -->
   <audio id="introAudio">
     <source src="Intro.m4a" type="audio/mp4" />
     Your browser does not support the audio element.
   </audio>
 
-  <!-- Glitching Logo -->
   <img id="introLogo" src="prismagon-logo.png" alt="Prismagon Logo">
 
-  <!-- LOGIN TERMINAL -->
   <div id="mainTerminal">
     <div class="terminal">
       <div class="logo">[PRISMAGON INC. SECURE LOGIN]</div>
@@ -167,7 +163,6 @@
     </div>
   </div>
 
-  <!-- COMMAND TERMINAL -->
   <div id="commandSection">
     <input type="text" id="commandInput" placeholder="Enter command..." onkeydown="if(event.key==='Enter'){handleCommand()}">
     <div id="logOutput">
@@ -233,14 +228,16 @@
 
       if (username === "melanie.burton@prismagoninc.com" && password === "K12WhyAmISecret") {
         response.innerHTML = "<br>Access Granted. Welcome back, Agent Burton.<br>Loading command interface...";
-        setTimeout(() => { response.innerHTML = ""; }, 5000);
         setTimeout(() => {
+          response.innerHTML = "";
           document.getElementById("mainTerminal").style.display = "none";
           document.getElementById("commandSection").style.display = "flex";
         }, 2000);
       } else {
         response.innerHTML = "<br>ACCESS DENIED. INCIDENT LOGGED.";
-        setTimeout(() => { response.innerHTML = ""; }, 5000);
+        setTimeout(() => {
+          response.innerHTML = "";
+        }, 5000);
       }
     }
 
@@ -254,27 +251,16 @@
       } else if (command === "camlogs") {
         showCamVideo();
       } else if (command === "help") {
-        showHelp();
+        alert("Available commands:\n- textlogs\n- camlogs\n- signout");
       } else if (command === "signout") {
-        signOut();
+        document.getElementById("commandSection").style.display = "none";
+        document.getElementById("mainTerminal").style.display = "block";
+        document.getElementById("username").value = "";
+        document.getElementById("password").value = "";
+        document.getElementById("response").innerHTML = "";
+        document.getElementById("output").innerHTML = "";
+        startTyping();
       }
-    }
-
-    function showHelp() {
-      const logOutput = document.getElementById("logOutput");
-      const videoOutput = document.getElementById("videoOutput");
-      videoOutput.style.display = "none";
-      logOutput.style.display = "block";
-      logOutput.innerHTML = `
-        <span class="closeBtn" onclick="closeLogs()">[X]</span>
-        <div>Available Commands:</div>
-        <hr>
-        <div>textlogs – View archived internal communication logs</div>
-        <div>camlogs – Playback recent security footage</div>
-        <div>help – Display this help menu</div>
-        <div>signout – Log out of the terminal session</div>
-        <hr>
-      `;
     }
 
     function showLogs() {
@@ -298,7 +284,28 @@
           "[SYSTEM]: Initializing internal network...",
           "[ADMIN]: Welcome, Agent Burton.",
           "[AGENT.LOCKE]: Why did the automated turret YOU were working on start malfunctioning and shooting OUR agent team?",
-          "[AGENT.BURTON]: I finished all the wiring...",
+          "[AGENT.BURTON]: I finished all the wiring, and tested it using the set images. It passed the test, then I stood in front of it and it didn't shoot. So I went back out of its view",
+          "[AGENT.BURTON]: then Agent Parker came in, and then the turret seemed normal. He was just looking around but then just started shooting at him.",
+          "[AGENT.LOCKE]: Then it turned to you and charged the laser before it overheated just before killing you.",
+          "[AGENT.BURTON]: Yes",
+          "[AGENT.LOCKE]: So tell me,",
+          "[AGENT.LOCKE]: HOW DID THAT HAPPEN",
+          "[AGENT.BURTON]: I did everything correctly.",
+          "[AGENT.BURTON]: It just did it on its own.",
+          "[AGENT.LOCKE]: It just did it on its own? So you're saying it's alive now?",
+          "[AGENT.BURTON]: No. I'm just saying",
+          "[AGENT.BURTON]: it did it on its own.",
+          "[AGENT.BURTON]: Plus, there is unnecessary Artificial Intelligence in the hardware.",
+          "[AGENT.LOCKE]: Well it's probably just for finding targets and knowing who is from Prismagon not to shoot.",
+          "[AGENT.BURTON]: I managed to get some of the hardware onto a USB stick, which I then plugged into my PC.",
+          "[AGENT.LOCKE]: OK?",
+          "[AGENT.BURTON]: It is sending data to an outside source",
+          "[AGENT.BURTON]: and receiving data, instructions, code,",
+          "[AGENT.BURTON]: the turret is being controlled by voidwell.",
+          "[AGENT.LOCKE]: What?",
+          "[AGENT.BURTON]: The turret is even sending the camera data to voidwell, they are looking through the turrets. And of course, because the turret uses identification to see if it should shoot or not,",
+          "[AGENT.BURTON]: it also has the names and other information of all the agents the turret camera has seen.",
+          "[AGENT.LOCKE]: Okay well",
           "[SYSTEM]: Terminal shutdown..."
         ];
 
@@ -319,6 +326,10 @@
       }, 5000);
     }
 
+    function closeLogs() {
+      document.getElementById("logOutput").style.display = "none";
+    }
+
     function showCamVideo() {
       document.getElementById("logOutput").style.display = "none";
       const videoContainer = document.getElementById("videoOutput");
@@ -328,24 +339,25 @@
       video.play();
     }
 
-    function closeLogs() {
-      document.getElementById("logOutput").style.display = "none";
-    }
-
     function closeVideo() {
       const video = document.getElementById("securityCamVideo");
       video.pause();
       document.getElementById("videoOutput").style.display = "none";
     }
 
-    function signOut() {
-      document.getElementById("commandSection").style.display = "none";
-      document.getElementById("mainTerminal").style.display = "block";
-    }
-
     function startIntro() {
       if (window.introStarted) return;
       window.introStarted = true;
+
+      // Request fullscreen
+      const docEl = document.documentElement;
+      if (docEl.requestFullscreen) {
+        docEl.requestFullscreen();
+      } else if (docEl.webkitRequestFullscreen) {
+        docEl.webkitRequestFullscreen();
+      } else if (docEl.msRequestFullscreen) {
+        docEl.msRequestFullscreen();
+      }
 
       pressKey.style.display = "none";
       audio.volume = 1;
