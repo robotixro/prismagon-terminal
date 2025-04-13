@@ -31,26 +31,15 @@
       box-sizing: border-box;
       caret-color: transparent;
       position: relative;
+      z-index: 2;
     }
 
-    input::selection {
+    input:focus::after {
+      content: attr(data-cursor-char);
       background-color: #33FF33;
       color: #000;
-    }
-
-    input::after {
-      content: "";
-      display: inline-block;
-      width: 10px;
-      height: 20px;
-      background: #33FF33;
       position: absolute;
-      animation: blink 1s step-end infinite;
-    }
-
-    @keyframes blink {
-      from, to { opacity: 0; }
-      50% { opacity: 1; }
+      animation: blink 1s steps(1) infinite;
     }
 
     button:hover {
@@ -161,19 +150,28 @@
       font-size: 20px;
       margin-top: 40vh;
     }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
   </style>
 </head>
 <body class="crt-overlay">
 
+  <!-- Press Any Key Screen -->
   <div id="pressKey">Press any key or tap to continue...</div>
 
+  <!-- Audio -->
   <audio id="introAudio">
     <source src="Intro.m4a" type="audio/mp4" />
     Your browser does not support the audio element.
   </audio>
 
+  <!-- Glitching Logo -->
   <img id="introLogo" src="prismagon-logo.png" alt="Prismagon Logo">
 
+  <!-- LOGIN TERMINAL -->
   <div id="mainTerminal">
     <div class="terminal">
       <div class="logo">[PRISMAGON INC. SECURE LOGIN]</div>
@@ -185,6 +183,7 @@
     </div>
   </div>
 
+  <!-- COMMAND TERMINAL -->
   <div id="commandSection">
     <input type="text" id="commandInput" placeholder="Enter command..." onkeydown="if(event.key==='Enter'){handleCommand()}">
     <div id="logOutput">
@@ -251,15 +250,13 @@
       if (username === "melanie.burton@prismagoninc.com" && password === "K12WhyAmISecret") {
         response.innerHTML = "<br>Access Granted. Welcome back, Agent Burton.<br>Loading command interface...";
         setTimeout(() => {
-          response.innerHTML = "";
           document.getElementById("mainTerminal").style.display = "none";
           document.getElementById("commandSection").style.display = "flex";
+          response.innerHTML = "";
         }, 5000);
       } else {
         response.innerHTML = "<br>ACCESS DENIED. INCIDENT LOGGED.";
-        setTimeout(() => {
-          response.innerHTML = "";
-        }, 5000);
+        setTimeout(() => response.innerHTML = "", 5000);
       }
     }
 
@@ -272,32 +269,21 @@
         showLogs();
       } else if (command === "camlogs") {
         showCamVideo();
+      } else if (command === "help") {
+        const logOutput = document.getElementById("logOutput");
+        logOutput.style.display = "block";
+        logOutput.innerHTML = `
+          <span class="closeBtn" onclick="closeLogs()">[X]</span>
+          <div>[SYSTEM]: Available commands:</div>
+          <div>– textlogs</div>
+          <div>– camlogs</div>
+          <div>– signout</div>
+          <hr>
+        `;
       } else if (command === "signout") {
         document.getElementById("commandSection").style.display = "none";
         document.getElementById("mainTerminal").style.display = "block";
-      } else if (command === "help") {
-        showHelp();
       }
-    }
-
-    function showHelp() {
-      const logOutput = document.getElementById("logOutput");
-      const videoOutput = document.getElementById("videoOutput");
-      videoOutput.style.display = "none";
-      logOutput.innerHTML = '<span class="closeBtn" onclick="closeLogs()">[X]</span>';
-      logOutput.style.display = "block";
-      const helpLines = [
-        "[HELP] Available commands:",
-        "- textlogs: View internal terminal message logs.",
-        "- camlogs: View security camera footage.",
-        "- signout: Log out of the command terminal.",
-        "- help: Display this help message."
-      ];
-      helpLines.forEach(line => {
-        const div = document.createElement("div");
-        div.textContent = line;
-        logOutput.appendChild(div);
-      });
     }
 
     function showLogs() {
@@ -320,12 +306,8 @@
         const lore = [
           "[SYSTEM]: Initializing internal network...",
           "[ADMIN]: Welcome, Agent Burton.",
-          "[AGENT.LOCKE]: Why did the automated turret YOU were working on start malfunctioning...",
-          "[AGENT.BURTON]: It passed the test... then started shooting.",
-          "[AGENT.LOCKE]: HOW DID THAT HAPPEN",
-          "[AGENT.BURTON]: It did it on its own.",
-          "[AGENT.BURTON]: It’s being controlled by voidwell.",
-          "[AGENT.LOCKE]: ...",
+          "[AGENT.LOCKE]: Why did the automated turret YOU were working on start malfunctioning and shooting OUR agent team?",
+          "[AGENT.BURTON]: ...",
           "[SYSTEM]: Terminal shutdown..."
         ];
         let index = 0;
@@ -364,12 +346,15 @@
       document.getElementById("videoOutput").style.display = "none";
     }
 
+    // Start sequence on keypress or click
     function startIntro() {
       if (window.introStarted) return;
       window.introStarted = true;
+
       pressKey.style.display = "none";
       audio.volume = 1;
       audio.play();
+
       setTimeout(() => {
         logo.style.display = "block";
         glitchFlicker();
@@ -378,23 +363,6 @@
 
     window.addEventListener("keydown", startIntro);
     window.addEventListener("click", startIntro);
-
-    // Attempt fullscreen on load
-    document.addEventListener("DOMContentLoaded", () => {
-      const requestFullScreen = () => {
-        const elem = document.documentElement;
-        if (elem.requestFullscreen) {
-          elem.requestFullscreen();
-        } else if (elem.mozRequestFullScreen) {
-          elem.mozRequestFullScreen();
-        } else if (elem.webkitRequestFullscreen) {
-          elem.webkitRequestFullscreen();
-        } else if (elem.msRequestFullscreen) {
-          elem.msRequestFullscreen();
-        }
-      };
-      setTimeout(requestFullScreen, 300);
-    });
   </script>
 </body>
 </html>
